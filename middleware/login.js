@@ -17,7 +17,7 @@ exports.loginUser = async (req, res, next) => {
         message: 'Wrong credentials'
     });
     const token = jwt.sign({
-        userId: user._doc._id,
+        userId: user._id,
         role: user.role.role
     }, process.env.JWT_KEY, {
         expiresIn: '1200s'
