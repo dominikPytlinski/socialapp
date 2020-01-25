@@ -2,7 +2,6 @@ const bcrypt = require('bcryptjs');
 
 //Models
 const userModel = require('../models/User');
-const roleModel = require('../models/Role');
 
 exports.addUser = async (req, res, next) => {
     try {
@@ -15,7 +14,7 @@ exports.addUser = async (req, res, next) => {
             email: req.body.email,
             password: passwordHashed,
             nickName: req.body.nickName,
-            roleId: req.body.roleId
+            role: req.body.roleId
         });
 
         const result = await newUser.save();
@@ -45,7 +44,7 @@ exports.getAllUsers = async (req, res, next) => {
     try {
         const users = [];
         const allUsers = await userModel.find({}).populate('roleId');
-        if(allUsers) {
+        if(allUsers.length > 0) {
             for(let user of allUsers) {
                 users.push({
                     ...user._doc,
