@@ -11,12 +11,14 @@ const PORT = process.env.PORT || 4000;
 
 const usersRouts = require('./routes/usersRoutes');
 const rolesRoutes = require('./routes/rolesRoutes');
+const loginRoutes = require('./routes/loginRoutes');
 
 app.use(bodyParser.json());
 app.use(cors());
 
 app.use('/users', usersRouts);
 app.use('/roles', rolesRoutes);
+app.use('/login', loginRoutes);
 
 const uri = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@cluster0-kszkn.mongodb.net/${process.env.MONGO_DB}?retryWrites=true&w=majority`;
 const mongoOption = {
