@@ -5,9 +5,11 @@ const router = express.Router();
 const userModel = require('../models/User');
 
 //Middleware
-const { addUser, getAllUsers } = require('../middleware/user');
+const { addUser, getAllUsers, getSingleUser, updateUser } = require('../middleware/user');
 
 router.get('/', getAllUsers);
 router.post('/', addUser);
+router.get('/:id', getSingleUser);
+router.put('/:id', updateUser);
 
 module.exports = router;
