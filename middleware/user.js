@@ -43,14 +43,14 @@ exports.addUser = async (req, res, next) => {
 exports.getAllUsers = async (req, res, next) => {
     try {
         const users = [];
-        const allUsers = await userModel.find({}).populate('roleId');
+        const allUsers = await userModel.find({}).populate('role');
         if(allUsers.length > 0) {
-            for(let user of allUsers) {
+            allUsers.map(user => {
                 users.push({
                     ...user._doc,
                     password: null
                 })
-            }
+            })
             res.status(200).json({
                 level: 'Success',
                 message: 'Users found',
@@ -69,7 +69,7 @@ exports.getAllUsers = async (req, res, next) => {
 
 exports.getSingleUser = async (req, res, next) => {
     try {
-        const user = await userModel.findById(req.params.id).populate('roleId');
+        const user = await userModel.findById(req.params.id).populate('role');
         if(user) {
             res.status(200).json({
                 level: 'Success',
@@ -113,7 +113,8 @@ exports.updateUser = async (req, res, next) => {
             nickName: req.body.nickName,
             roleId: req.body.roleId
         };
-        const updatedUser = await userModel.findByIdAndUpdate(req.params.id, user).populate('roleId');
+        const updatedUser = await userModel.findByIdAndUpdate(req.params.id, user, { new: true }).populate('role');
+        console.log(updatedUser)
         if(updatedUser) {
             res.status(200).json({
                 level: 'Success',
