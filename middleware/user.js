@@ -17,7 +17,8 @@ exports.addUser = async (req, res, next) => {
             role: req.body.roleId
         });
 
-        const result = await newUser.save();
+        let result = await newUser.save();
+        result = await result.populate('role').execPopulate();
 
         res.status(201).json({
             level: 'Success',
