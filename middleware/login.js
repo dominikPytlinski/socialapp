@@ -7,12 +7,12 @@ exports.loginUser = async (req, res, next) => {
     const user = await userModel.findOne({
         email: req.body.email
     }).populate('role');
-    if(!user) res.status(400).json({
+    if(!user) return res.status(400).json({
         level: 'Error',
         message: 'Wrong credentials'
     });
     const validPassword = await bcrypt.compare(req.body.password, user.password);
-    if(!validPassword) res.status(400).json({
+    if(!validPassword) return res.status(400).json({
         level: 'Error',
         message: 'Wrong credentials'
     });
