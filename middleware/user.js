@@ -5,16 +5,35 @@ const userModel = require('../models/User');
 
 exports.addUser = async (req, res, next) => {
     try {
-        if(req.body.password != req.body.confirmPassword) res.status(400).json({
+        const { email, nickName, password, confirmPassword, roleId } = req.body;
+
+        if(!email || !nickName || !password || !confirmPassword || !roleId) res.status(400).json({
+            level: 'Error',
+            message: 'All fields are requested'
+        })
+        if(password != confirmPassword) res.status(400).json({
             level: 'Error',
             message: 'Passwords must match'
         })
-        const passwordHashed = await bcrypt.hash(req.body.password, 10)
+
+        const userEmail = await userModel.find({
+            email: email
+        });
+        const userNickName = await userModel.find({
+            nickName: nickName
+        });
+
+        if(userEmail || userNickName) res.status(400).json({
+            level: 'Error',
+            message: 'Email or Nickname allready exists'
+        });
+
+        const passwordHashed = await bcrypt.hash(password, 10)
         const newUser = new userModel({
-            email: req.body.email,
+            email: email,
             password: passwordHashed,
-            nickName: req.body.nickName,
-            role: req.body.roleId
+            nickName: nickName,
+            role: roleId
         });
 
         let result = await newUser.save();
@@ -103,16 +122,18 @@ exports.getSingleUser = async (req, res, next) => {
 
 exports.updateUser = async (req, res, next) => {
     try {
-        if(req.body.password != req.body.confirmPassword) res.status(400).json({
+        const { email, nickName, password, confirmPassword, roleId } = req.body;
+
+        if(password != confirmPassword) res.status(400).json({
             level: 'Error',
             message: 'Passwords must match'
         })
-        const passwordHashed = await bcrypt.hash(req.body.password, 10);
+        const passwordHashed = await bcrypt.hash(password, 10);
         const user = {
-            email: req.body.email,
+            email: email,
             password: passwordHashed,
-            nickName: req.body.nickName,
-            roleId: req.body.roleId
+            nickName: nickName,
+            roleId: roleId
         };
         const updatedUser = await userModel.findByIdAndUpdate(req.params.id, user, { new: true }).populate('role');
         console.log(updatedUser)
