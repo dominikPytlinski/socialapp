@@ -75,10 +75,12 @@ exports.getAllUsers = async (req, res, next) => {
         if(allUsers.length > 0) {
             allUsers.map(user => {
                 users.push({
-                    ...user._doc,
-                    password: null
-                })
-            })
+                    _id: user._doc._id,
+                    email: user._doc.email,
+                    nickName: user._doc.nickName,
+                    role: user._doc.role
+                });
+            });
             return res.status(200).json({
                 level: 'Success',
                 message: 'Users found',

@@ -20,7 +20,7 @@ exports.loginUser = async (req, res, next) => {
         userId: user._id,
         role: user.role.role
     }, process.env.JWT_KEY, {
-        expiresIn: '1200s'
+        expiresIn: '1h'
     });
     res.status(200).json({
         level: 'Success',
