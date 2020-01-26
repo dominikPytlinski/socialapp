@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 
 //Models
 const userModel = require('../models/User');
+const roleModel = require('../models/Role');
 
 exports.addUser = async (req, res, next) => {
     try {
@@ -9,22 +10,30 @@ exports.addUser = async (req, res, next) => {
         if(!email || !nickName || !password || !confirmPassword || !roleId) return res.status(400).json({
             level: 'Error',
             message: 'All fields are requested'
-        })
+        });
         if(password != confirmPassword) return res.status(400).json({
             level: 'Error',
             message: 'Passwords must match'
+        });
+        const role = await roleModel.findById(roleId);
+        if(role.role === 'admin' && req.role != 'admin') return res.status(400).json({
+            level: 'Error',
+            message: 'One of params has incorrect value'
         })
         const userEmail = await userModel.find({
             email: email
         });
-        console.log(userEmail)
         const userNickName = await userModel.find({
             nickName: nickName
         });
-        if(userEmail.length > 0 || userNickName.length > 0) return res.status(400).json({
+        if(userEmail.length > 0) return res.status(400).json({
             level: 'Error',
-            message: 'Email or Nickname allready exists'
+            message: 'Email allready exists'
         });
+        if(userNickName.length > 0) return res.status(400).json({
+            level: 'Error',
+            message: 'Nickname allready exists'
+        })
         const passwordHashed = await bcrypt.hash(password, 10)
         const newUser = new userModel({
             email: email,
@@ -56,6 +65,10 @@ exports.addUser = async (req, res, next) => {
 }
 
 exports.getAllUsers = async (req, res, next) => {
+    if(req.role != 'admin') return res.status(401).json({
+        level: 'Error',
+        message: 'Unauthorized'
+    });
     try {
         const users = [];
         const allUsers = await userModel.find({}).populate('role');
@@ -116,9 +129,17 @@ exports.getSingleUser = async (req, res, next) => {
 }
 
 exports.updateUser = async (req, res, next) => {
+    if(req.role != 'admin' && req.userId != req.params.id) return res.status(401).json({
+        level: 'Error',
+        message: 'Unauthorized'
+    })
+    /**
+     * TO DO
+     * 
+     * validation, permisssion
+     */
     try {
         const { email, nickName, password, confirmPassword, roleId } = req.body;
-
         if(password != confirmPassword) return res.status(400).json({
             level: 'Error',
             message: 'Passwords must match'
@@ -152,6 +173,10 @@ exports.updateUser = async (req, res, next) => {
 }
 
 exports.deleteUser = async (req, res, next) => {
+    if(req.role != 'admin' && req.userId != req.params.id) return res.status(401).json({
+        level: 'Error',
+        message: 'Unauthorized'
+    })
     try {
         const deletedUser = await userModel.findByIdAndDelete(req.params.id);
         if(deletedUser) {

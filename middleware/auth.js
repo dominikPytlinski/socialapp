@@ -1,7 +1,6 @@
 const jwt = require('jsonwebtoken');
 
-exports.isAuth = (option) => {
-    return (req, res, next) => {
+exports.isLogged = (req, res, next) => {
         const auth = req.headers.authorization;
         if(!auth) return res.status(401).json({
             level: 'Error',
@@ -14,10 +13,6 @@ exports.isAuth = (option) => {
         });
         try {
             const decoded = jwt.verify(token, process.env.JWT_KEY);
-            if(option && option != decoded.role) return res.status(401).json({
-                level: 'Error',
-                message: 'Unauthorized'
-            });
             req.role = decoded.role;
             req.userId = decoded.userId;
             next();
@@ -28,4 +23,3 @@ exports.isAuth = (option) => {
             });
         }
     }
-}
