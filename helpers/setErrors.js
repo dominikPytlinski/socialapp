@@ -1,6 +1,6 @@
 exports.setErrors = (error, res) => {
     if(error.name == 'CustomError') {
-        return res.status(error.kind).json({
+        return res.status(error.code).json({
             error: error.message
         });
     } else {

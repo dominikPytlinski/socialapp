@@ -13,20 +13,20 @@ exports.addUser = async (req, res, next) => {
         if(!email || !nickName || !password || !confirmPassword || !roleId) {
             const e = new Error('All fields are required');
             e.name = 'CustomError';
-            e.kind = 400;
+            e.code = 400;
             throw e;
         }
         if(password != confirmPassword) {
             const e = new Error('Passwords must match');
             e.name = 'CustomError';
-            e.kind = 400;
+            e.code = 400;
             throw e;
         }
         const role = await roleModel.findById(roleId);
         if(role.role === 'admin' && req.role != 'admin') {
             const e = new Error('One of the params has incorrect value');
             e.name = 'CustomError';
-            e.kind = 400;
+            e.code = 400;
             throw e;
         }
         const userEmail = await userModel.find({
@@ -35,7 +35,7 @@ exports.addUser = async (req, res, next) => {
         if(userEmail.length > 0) {
             const e = new Error('Email allresdy exists');
             e.name = 'CustomError';
-            e.kind = 400;
+            e.code = 400;
             throw e;
         }
         const userNickName = await userModel.find({
@@ -44,7 +44,7 @@ exports.addUser = async (req, res, next) => {
         if(userNickName.length > 0) {
             const e = new Error('Nickname allready exists');
             e.name = 'CustomError';
-            e.kind = 400;
+            e.code = 400;
             throw e;
         }
         const passwordHashed = await bcrypt.hash(password, 10)
@@ -70,8 +70,7 @@ exports.addUser = async (req, res, next) => {
     } catch (error) {
         if(error.name === 'ValidationError') {
             return res.status(400).json({
-                level: 'Error',
-                message: error.message
+                error: error.message
             });
         } else {
             setErrors(error, res);
@@ -84,7 +83,7 @@ exports.getAllUsers = async (req, res, next) => {
         if(req.role != 'admin') {
             const e = new Error('Unauthorized');
             e.name = 'CustomError';
-            e.kind = 401;
+            e.code = 401;
             throw e;
         }
         const users = [];
@@ -133,8 +132,7 @@ exports.getSingleUser = async (req, res, next) => {
     } catch (error) {
         if(error.kind === 'ObjectId') {
             return res.status(400).json({
-                level: 'Error',
-                message: error.message
+                error: error.message
             });
         } else {
             setErrors(error, res);
@@ -143,46 +141,55 @@ exports.getSingleUser = async (req, res, next) => {
 }
 
 exports.updateUser = async (req, res, next) => {
-    if(req.role != 'admin' && req.userId != req.params.id) return res.status(401).json({
-        level: 'Error',
-        message: 'Unauthorized'
-    })
-    /**
-     * TO DO
-     * 
-     * validation, permisssion
-     */
     try {
+        let user = {}
+        if(req.role != 'admin' && req.userId != req.params.id) {
+            const e = new Error('Unauthorized');
+            e.name = 'CustomError',
+            e.code = 401;
+            throw e;
+        }
         const { email, nickName, password, confirmPassword, roleId } = req.body;
-        if(password != confirmPassword) return res.status(400).json({
-            level: 'Error',
-            message: 'Passwords must match'
-        })
-        const passwordHashed = await bcrypt.hash(password, 10);
-        const user = {
+        if(!email || !nickName || !roleId) {
+            const e = new Error('Email, nickname and role are required');
+            e.name = 'CustomError';
+            e.code = 400;
+            throw e;
+        }
+        if(password) {
+            if(password != confirmPassword) {
+                const e = new Error('Passwords must match');
+                e.name = 'CustomError',
+                e.code = 400;
+                throw e;
+            }
+            const passwordHashed = await bcrypt.hash(password, 10);
+            user = {
+                email: email,
+                nickName: nickName,
+                password: passwordHashed,
+                roleId: roleId
+            }
+        }        
+        user = {
             email: email,
-            password: passwordHashed,
             nickName: nickName,
             roleId: roleId
         };
         const updatedUser = await userModel.findByIdAndUpdate(req.params.id, user, { new: true }).populate('role');
-        console.log(updatedUser)
-        if(updatedUser) {
-            return res.status(200).json({
-                level: 'Success',
-                message: 'User updated successfully',
-                data: {
-                    ...updatedUser._doc,
-                    password: null
-                }
-            })
-        }
-    } catch (error) {
-        console.log(error)
-        return res.status(500).json({
-            level: 'Error',
-            message: error
+        return res.status(200).json({
+            message: 'User updated successfully',
+            data: {
+               _id: updatedUser._doc._id,
+               email: updatedUser._doc.email,
+               nickName: updatedUser._doc.nickName,
+               role: updatedUser._doc.role,
+               createdAt: updatedUser._doc.createdAt,
+               updatedAt: updatedUser._doc.updatedAt 
+            }
         })
+    } catch (error) {
+        setErrors(error, res);
     }
 }
 
@@ -191,7 +198,7 @@ exports.deleteUser = async (req, res, next) => {
         if(req.role != 'admin' && req.userId != req.params.id) {
             const e = new Error('Unauthorized');
             e.name = 'CustomError',
-            e.kind = 401;
+            e.code = 401;
             throw e;
         }
         const deletedUser = await userModel.findByIdAndDelete(req.params.id);
@@ -202,7 +209,7 @@ exports.deleteUser = async (req, res, next) => {
         } else {
             const e = new Error('Bad request');
             e.name = 'CustomError',
-            e.kind = 400;
+            e.code = 400;
             throw e;
         }
     } catch (error) {
