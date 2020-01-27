@@ -3,8 +3,9 @@ const router = express.Router();
 
 //Middleware
 const { addRole, getAllRoles } = require('../middleware/role');
+const { isLogged } = require('../middleware/auth');
 
-router.get('/', getAllRoles);
-router.post('/', addRole);
+router.get('/', isLogged, getAllRoles);
+router.post('/', isLogged, addRole);
 
 module.exports = router;
