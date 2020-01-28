@@ -29,11 +29,9 @@ exports.addLike = async (req, res, next) => {
 
 exports.deleteLike = async (req, res, next) => {
     const like = await likeModel.findById(req.params.id);
-    console.log(like)
-    console.log(req.userId)
     if(!like) return res.status(400).json({
         data: 'No results'
-    })
+    });
     if(like.user != req.userId && req.role != 'admin') setErrors(401, 'Unauthorized');
     const deletedLike = await likeModel.findByIdAndDelete(req.params.id);
     if(deletedLike) return res.status(200).json({

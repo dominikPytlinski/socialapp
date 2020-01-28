@@ -85,22 +85,16 @@ exports.addPost = async (req, res, next) => {
 
 exports.deletePost = async (req, res, next) => {
     try {
-        let deletedPost = null;
-        let post = null;
-        if(req.role == 'admin') deletedPost = await postModel.findByIdAndDelete(req.params.id);
-        else post = await postModel.findOne({
-            ceator: req.userId
+        const post = await postModel.findById(req.params.id);
+        if(!post) return res.status(404).json({
+            data: 'No result'
         });
-        if(post) deletedPost = await postModel.findOneAndDelete({
-            _id: req.params.id,
-            creator: req.userId
+        if(post.creator != req.userId && req.role != 'admin') setErrors(401, 'Unathorized');
+        const deltedPost = await postModel.findByIdAndDelete(req.params.id);
+        if(deltedPost) return res.status(200).json({
+            message: 'Post deleted successfully'
         });
-        else setErrors(401, 'Unauthorized');
-        if(deletedPost) return res.status(200).json({
-                level: 'Success',
-                message: 'Post delted successfully'
-            });
-        else setErrors(500, 'Somenting went wrong');
+        else setErrors(500, 'Something went wrong');
     } catch (error) {
         returnErrors(error, res);
     }
