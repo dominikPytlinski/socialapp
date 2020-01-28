@@ -86,8 +86,9 @@ exports.addPost = async (req, res, next) => {
 exports.deletePost = async (req, res, next) => {
     try {
         let deletedPost = null;
-        if(req.role == 'admin') deletedPost = await postModel.findByIdAndDelete(req.params.id)
-        else const post = postModel.findOne({
+        let post = null;
+        if(req.role == 'admin') deletedPost = await postModel.findByIdAndDelete(req.params.id);
+        else post = await postModel.findOne({
             ceator: req.userId
         });
         if(post) deletedPost = await postModel.findOneAndDelete({
@@ -108,6 +109,7 @@ exports.deletePost = async (req, res, next) => {
 exports.updatePost = async (req, res, next) => {
     try {
         const { title, body } = req.body;
+        let post = null;
         if(!title || !body) setErrors(400, 'All fields are required');
         const newPost = {
             title,
@@ -115,7 +117,7 @@ exports.updatePost = async (req, res, next) => {
         }
         let updatedPost = null;
         if(req.role == 'admin') updatedPost = await postModel.findByIdAndUpdate(req.params.id, newPost, { new: true }).populate('creator');
-        else const post = await postModel.findOne({
+        else post = await postModel.findOne({
             creator: req.userId
         });
         if(post) updatedPost = await postModel.findOneAndUpdate({
