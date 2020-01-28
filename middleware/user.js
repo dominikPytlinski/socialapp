@@ -5,48 +5,23 @@ const userModel = require('../models/User');
 const roleModel = require('../models/Role');
 
 //Helpers
-const { setErrors } = require('../helpers/setErrors');
+const { returnErrors, setErrors } = require('../helpers/errors');
 
 exports.addUser = async (req, res, next) => {
     try {
         const { email, nickName, password, confirmPassword, roleId } = req.body;
-        if(!email || !nickName || !password || !confirmPassword || !roleId) {
-            const e = new Error('All fields are required');
-            e.name = 'CustomError';
-            e.code = 400;
-            throw e;
-        }
-        if(password != confirmPassword) {
-            const e = new Error('Passwords must match');
-            e.name = 'CustomError';
-            e.code = 400;
-            throw e;
-        }
+        if(!email || !nickName || !password || !confirmPassword || !roleId) setErrors(400, 'All fields are required')
+        if(password != confirmPassword) setErrors(400, 'Passwords must match');
         const role = await roleModel.findById(roleId);
-        if(role.role === 'admin' && req.role != 'admin') {
-            const e = new Error('One of the params has incorrect value');
-            e.name = 'CustomError';
-            e.code = 400;
-            throw e;
-        }
+        if(role.role === 'admin' && req.role != 'admin') setErrors(400, 'One of the params has incorrect value');
         const userEmail = await userModel.find({
             email: email
         });
-        if(userEmail.length > 0) {
-            const e = new Error('Email allresdy exists');
-            e.name = 'CustomError';
-            e.code = 400;
-            throw e;
-        }
+        if(userEmail.length > 0) setErrors(400, 'Email allresdy exists');
         const userNickName = await userModel.find({
             nickName: nickName
         });
-        if(userNickName.length > 0) {
-            const e = new Error('Nickname allready exists');
-            e.name = 'CustomError';
-            e.code = 400;
-            throw e;
-        }
+        if(userNickName.length > 0) setErrors(400, 'Nickname allready exists');
         const passwordHashed = await bcrypt.hash(password, 10)
         const newUser = new userModel({
             email: email,
@@ -73,19 +48,14 @@ exports.addUser = async (req, res, next) => {
                 error: error.message
             });
         } else {
-            setErrors(error, res);
+            returnErrors(error, res);
         }
     }
 }
 
 exports.getAllUsers = async (req, res, next) => {
     try {
-        if(req.role != 'admin') {
-            const e = new Error('Unauthorized');
-            e.name = 'CustomError';
-            e.code = 401;
-            throw e;
-        }
+        if(req.role != 'admin') setErrors(401, 'Unauthorized');
         const users = [];
         const allUsers = await userModel.find({}).populate('role');
         if(allUsers.length > 0) {
@@ -106,7 +76,7 @@ exports.getAllUsers = async (req, res, next) => {
             });
         }
     } catch (error) {
-        setErrors(error, res);
+        returnErrors(error, res);
     }
 }
 
@@ -135,7 +105,7 @@ exports.getSingleUser = async (req, res, next) => {
                 error: error.message
             });
         } else {
-            setErrors(error, res);
+            returnErrors(error, res);
         }
     }
 }
@@ -143,26 +113,11 @@ exports.getSingleUser = async (req, res, next) => {
 exports.updateUser = async (req, res, next) => {
     try {
         let user = {}
-        if(req.role != 'admin' && req.userId != req.params.id) {
-            const e = new Error('Unauthorized');
-            e.name = 'CustomError',
-            e.code = 401;
-            throw e;
-        }
+        if(req.role != 'admin' && req.userId != req.params.id) setErrors(401, 'Unauthorized');
         const { email, nickName, password, confirmPassword, roleId } = req.body;
-        if(!email || !nickName || !roleId) {
-            const e = new Error('Email, nickname and role are required');
-            e.name = 'CustomError';
-            e.code = 400;
-            throw e;
-        }
+        if(!email || !nickName || !roleId) setErrors(400, 'Email, nickname and role are required');
         if(password) {
-            if(password != confirmPassword) {
-                const e = new Error('Passwords must match');
-                e.name = 'CustomError',
-                e.code = 400;
-                throw e;
-            }
+            if(password != confirmPassword) setErrors(400, 'Passwords must match');
             const passwordHashed = await bcrypt.hash(password, 10);
             user = {
                 email: email,
@@ -189,30 +144,17 @@ exports.updateUser = async (req, res, next) => {
             }
         })
     } catch (error) {
-        setErrors(error, res);
+        returnErrors(error, res);
     }
 }
 
 exports.deleteUser = async (req, res, next) => {
     try {
-        if(req.role != 'admin' && req.userId != req.params.id) {
-            const e = new Error('Unauthorized');
-            e.name = 'CustomError',
-            e.code = 401;
-            throw e;
-        }
+        if(req.role != 'admin' && req.userId != req.params.id) setErrors(401, 'Unauthorized');
         const deletedUser = await userModel.findByIdAndDelete(req.params.id);
-        if(deletedUser) {
-            return res.status(200).json({
-                message: 'User deleted successfully'
-            })
-        } else {
-            const e = new Error('Bad request');
-            e.name = 'CustomError',
-            e.code = 400;
-            throw e;
-        }
+        if(deletedUser) return res.status(200).json({message: 'User deleted successfully'});
+        else setErrors(400, 'Bad request');
     } catch (error) {
-        setErrors(error, res);
+        returnErrors(error, res);
     }
 }

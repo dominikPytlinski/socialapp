@@ -1,22 +1,12 @@
 const jwt = require('jsonwebtoken');
-const { setErrors } = require('../helpers/setErrors');
+const { returnErrors, setErrors } = require('../helpers/errors');
 
 exports.isLogged = (req, res, next) => {
-        const auth = req.headers.authorization;
-        if(!auth) {
-            const e = new Error('Unauthorized');
-            e.name = 'CustomError';
-            e.code = 401;
-            throw e;
-        }
-        const token = auth.split(' ')[1];
-        if(!token) {
-            const e = new Error('Unauthorized');
-            e.name = 'CustomError';
-            e.code = 401;
-            throw e;
-        }
         try {
+            const auth = req.headers.authorization;
+            if(!auth) setErrors(401,'Unauthorized');
+            const token = auth.split(' ')[1];
+            if(!token) setErrors(401, 'Unauthorized');
             const decoded = jwt.verify(token, process.env.JWT_KEY);
             req.role = decoded.role;
             req.userId = decoded.userId;
@@ -27,7 +17,7 @@ exports.isLogged = (req, res, next) => {
                     error: 'Unauthorized'
                 });
             } else {
-                setErrors(error, res);
+                returnErrors(error, res);
             }
         }
     }

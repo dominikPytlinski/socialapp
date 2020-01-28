@@ -2,16 +2,11 @@
 const rolesModel = require('../models/Role');
 
 //Helpers
-const { setErrors } = require('../helpers/setErrors');
+const { returnErrors, setErrors } = require('../helpers/errors');
 
 exports.addRole = async (req, res, next) => {
     try {
-        if(req.role != 'admin') {
-            const e = new Error('Unauthorized');
-            e.name = 'CustomError',
-            e.code = 401;
-            throw e;
-        }
+        if(req.role != 'admin') setErrors(401, 'Unauthorized');
         const newRole = new rolesModel({
             role: req.body.role
         });
@@ -26,30 +21,23 @@ exports.addRole = async (req, res, next) => {
                 error: error.message
             });
         } else {
-            setErrors(error, res);
+            returnErrors(error, res);
         }
     }
 }
 
 exports.getAllRoles = async (req, res, next) => {
     try {
-        if(req.role != 'admin') {
-            const e = new Error('Unauthorized');
-            e.name = 'CustomError';
-            e.code = 401;
-            throw e;
-        }
+        console.log('dupa')
+        if(req.role != 'admin') setErrors(401, 'Unauthorized');
         const roles = await rolesModel.find({});
-        if(roles) {
-            res.status(200).json({
-                data: {roles}
-            });
-        } else {
-            res.status(404).json({
-                data: 'No results'
-            })
-        }
+        if(roles) res.status(200).json({ 
+            data: {roles} 
+        });
+        else res.status(404).json({ 
+            data: 'No results' 
+        });
     } catch (error) {
-        setErrors(error, res);
+        returnErrors(error, res);
     }
 }

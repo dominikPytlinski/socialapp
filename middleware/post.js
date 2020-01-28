@@ -2,7 +2,7 @@
 const postModel = require('../models/Post');
 
 //Helpers
-const { setErrors } = require('../helpers/setErrors');
+const { returnErrors, setErrors } = require('../helpers/errors');
  
 exports.getAllPosts = async (req, res, next) => {
     try {
@@ -22,16 +22,15 @@ exports.getAllPosts = async (req, res, next) => {
             data: posts
         });
     } catch (error) {
-        setErrors(error, res);
+        returnErrors(error, res);
     }
 }
 
 exports.getUserPosts = async (req, res, next) => {
     try {
-        const requestedUserId = (req.role == 'admin' && req.params.id) ? req.params.id : req.userId;
         const posts = [];
         const userPosts = await postModel.find({
-            creator: requestedUserId
+            creator: req.params.id
         }).populate('creator');
         if(userPosts.length > 0) {
             userPosts.map(post => {
@@ -53,19 +52,14 @@ exports.getUserPosts = async (req, res, next) => {
             });
         }
     } catch (error) {
-        setErrors(error, res);
+        returnErrors(error, res);
     }
 }
 
 exports.addPost = async (req, res, next) => {
     try {
         const { title, body } = req.body;
-        if(!title || !body ) {
-            const e = new Error('All fields are required');
-            e.name = 'CustomError',
-            e.code = 400;
-            throw e;
-        }
+        if(!title || !body ) setErrors(400, 'All fields are required');
         const newPost = new postModel({
             title: title,
             body: body,
@@ -85,7 +79,7 @@ exports.addPost = async (req, res, next) => {
             }
         });
     } catch (error) {
-        setErrors(error, res);
+        returnErrors(error, res);
     }
 }
 
@@ -93,49 +87,46 @@ exports.deletePost = async (req, res, next) => {
     try {
         let deletedPost = null;
         if(req.role == 'admin') deletedPost = await postModel.findByIdAndDelete(req.params.id)
-        else deletedPost = await postModel.findOneAndDelete({
+        else const post = postModel.findOne({
+            ceator: req.userId
+        });
+        if(post) deletedPost = await postModel.findOneAndDelete({
             _id: req.params.id,
             creator: req.userId
         });
-        if(deletedPost) {
-            return res.status(200).json({
+        else setErrors(401, 'Unauthorized');
+        if(deletedPost) return res.status(200).json({
                 level: 'Success',
                 message: 'Post delted successfully'
             });
-        } else {
-            const e = new Error('Something went wrong');
-            e.name = 'CustomError',
-            e.code = 500;
-            throw e;
-        }
+        else setErrors(500, 'Somenting went wrong');
     } catch (error) {
-        setErrors(error, res);
+        returnErrors(error, res);
     }
 }
 
 exports.updatePost = async (req, res, next) => {
     try {
         const { title, body } = req.body;
-        if(!title || !body) {
-            const e = new Error('All fields are required');
-            e.name = 'CustomError',
-            e.code = 400;
-            throw e;
-        }
-        const post = {
+        if(!title || !body) setErrors(400, 'All fields are required');
+        const newPost = {
             title,
             body
         }
         let updatedPost = null;
-        if(req.role == 'admin') updatedPost = await postModel.findByIdAndUpdate(req.params.id, post, { new: true }).populate('creator');
-        else updatedPost = await postModel.findOneAndUpdate({
+        if(req.role == 'admin') updatedPost = await postModel.findByIdAndUpdate(req.params.id, newPost, { new: true }).populate('creator');
+        else const post = await postModel.findOne({
+            creator: req.userId
+        });
+        if(post) updatedPost = await postModel.findOneAndUpdate({
             _id: req.params.id,
             creator: req.userId
-        }, {
+        }, 
+        newPost, {
             new: true
-        }).populate('creator');
-        if(updatedPost) {
-            res.status(200).json({
+        })
+        .populate('creator');
+        if(updatedPost) res.status(200).json({
                 message: 'Post updated successfully',
                 data: {
                     ...updatedPost._doc,
@@ -145,14 +136,9 @@ exports.updatePost = async (req, res, next) => {
                         nickName: updatedPost._doc.creator.nickName
                     }
                 }
-            })
-        } else {
-            const e = new Error('Something went wrong');
-            e.name = 'CustomError';
-            e.code = 500;
-            throw e;
-        }
+            });
+        else setErrors(500, 'Something went wrong');
     } catch (error) {
-        setErrors(error, res); 
+        returnErrors(error, res); 
     }
 }
