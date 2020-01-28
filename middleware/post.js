@@ -102,37 +102,29 @@ exports.deletePost = async (req, res, next) => {
 
 exports.updatePost = async (req, res, next) => {
     try {
+        const post = await postModel.findById(req.params.id);
+        if(!post) return res.status(404).json({
+            data: 'No results'
+        });
+        if(post.creator != req.userId && req.role != 'admin') setErrors(401, 'Unathorized');
         const { title, body } = req.body;
-        let post = null;
         if(!title || !body) setErrors(400, 'All fields are required');
         const newPost = {
             title,
             body
         }
-        let updatedPost = null;
-        if(req.role == 'admin') updatedPost = await postModel.findByIdAndUpdate(req.params.id, newPost, { new: true }).populate('creator');
-        else post = await postModel.findOne({
-            creator: req.userId
-        });
-        if(post) updatedPost = await postModel.findOneAndUpdate({
-            _id: req.params.id,
-            creator: req.userId
-        }, 
-        newPost, {
-            new: true
-        })
-        .populate('creator');
-        if(updatedPost) res.status(200).json({
-                message: 'Post updated successfully',
-                data: {
-                    ...updatedPost._doc,
-                    creator: {
-                        _id: updatedPost._doc.creator._id,
-                        email: updatedPost._doc.creator.email,
-                        nickName: updatedPost._doc.creator.nickName
-                    }
+        const updatedPost = await postModel.findByIdAndUpdate(req.params.id, newPost, { new: true }).populate('creator');
+        if(updatedPost) return res.status(200).json({
+            message: 'Post updated successfully',
+            data: {
+                ...updatedPost._doc,
+                creator: {
+                    _id: updatedPost._doc.creator._id,
+                    email: updatedPost._doc.creator.email,
+                    nickName: updatedPost._doc.creator.nickName
                 }
-            });
+            }
+        });
         else setErrors(500, 'Something went wrong');
     } catch (error) {
         returnErrors(error, res); 
