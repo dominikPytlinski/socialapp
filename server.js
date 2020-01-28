@@ -14,6 +14,7 @@ const usersRouts = require('./routes/usersRoutes');
 const rolesRoutes = require('./routes/rolesRoutes');
 const loginRoutes = require('./routes/loginRoutes');
 const postsRoutes = require('./routes/postsRoutes');
+const likesRoutes = require('./routes/likesRoutes');
 
 app.use(bodyParser.json());
 app.use(cors());
@@ -22,6 +23,7 @@ app.use('/users', usersRouts);
 app.use('/roles', rolesRoutes);
 app.use('/login', loginRoutes);
 app.use('/posts', postsRoutes);
+app.use('/likes', likesRoutes);
 
 const uri = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@cluster0-kszkn.mongodb.net/${process.env.MONGO_DB}?retryWrites=true&w=majority`;
 const mongoOption = {
