@@ -64,7 +64,9 @@ exports.addPost = async (req, res, next) => {
         const newPost = new postModel({
             title: title,
             body: body,
-            creator: req.userId
+            creator: req.userId,
+            likeCount: 0,
+            comentCount: 0
         });
         let result = await newPost.save();
         result = await result.populate('creator').execPopulate();
@@ -141,12 +143,14 @@ exports.likePost = async (req, res, next) => {
         if(like) return res.status(400).json({
             message: 'You have liked this post allready'
         });
+        const post = await postModel.findById(req.body.post);
         const newLike = likeModel({
             user: req.userId,
             post: req.body.post 
         });
         let createdLike = await newLike.save();
         createdLike = await createdLike.populate('user').execPopulate();
+        await postModel.findByIdAndUpdate(req.body.post, { likeCount: post._doc.likeCount++ });
         if(createdLike) return res.status(201).json({
             message: 'Liked',
             data: {
