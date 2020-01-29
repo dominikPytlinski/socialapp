@@ -147,7 +147,6 @@ exports.likePost = async (req, res, next) => {
         });
         let createdLike = await newLike.save();
         createdLike = await createdLike.populate('user').execPopulate();
-        console.log(createdLike._doc)
         if(createdLike) return res.status(201).json({
             message: 'Liked',
             data: {
