@@ -1,5 +1,6 @@
 //Models
 const postModel = require('../models/Post');
+const likeModel = require('../models/Like');
 
 //Helpers
 const { returnErrors, setErrors } = require('../helpers/errors');
@@ -128,5 +129,54 @@ exports.updatePost = async (req, res, next) => {
         else setErrors(500, 'Something went wrong');
     } catch (error) {
         returnErrors(error, res); 
+    }
+}
+
+exports.likePost = async (req, res, next) => {
+    try {
+        const like = await likeModel.findOne({
+            user: req.userId,
+            post: req.body.post
+        });
+        if(like) return res.status(400).json({
+            message: 'You have liked this post allready'
+        });
+        const newLike = likeModel({
+            user: req.userId,
+            post: req.body.post 
+        });
+        let createdLike = await newLike.save();
+        createdLike = await createdLike.populate('user').execPopulate();
+        console.log(createdLike._doc)
+        if(createdLike) return res.status(201).json({
+            message: 'Liked',
+            data: {
+                ...createdLike._doc,
+                user: {
+                    _id: createdLike._doc.user._id,
+                    email: createdLike._doc.user.email,
+                    nickName: createdLike._doc.user.nickName,
+                    createdAt: createdLike._doc.user.createdAt,
+                    updatedAt: createdLike._doc.user.updatedAt
+                }
+            }
+        });
+        else setErrors(500, 'Something went wrong');
+    } catch (error) {
+        returnErrors(error, res);
+    }
+}
+
+exports.unlikePost = async (req, res, next) => {
+    try {
+        const unliked = await likeModel.findOneAndDelete({
+            user: req.userId,
+            post: req.body.post
+        });
+        if(unliked) return res.status(200).json({
+            message: 'Unliked'
+        });
+    } catch (error) {
+        returnErrors(error, res);
     }
 }
