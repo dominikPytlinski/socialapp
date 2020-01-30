@@ -3,6 +3,7 @@ const { setErrors, returnErrors } = require('../helpers/errors');
 
 //Models
 const postModel = require('../models/Post');
+const commentModel = require('../models/Comment');
 
 exports.addPost = async (req, res) => {
     try {
@@ -154,5 +155,34 @@ exports.unlikePost = async (req, res) => {
         else setErrors(500, 'Something went wrong');
     } catch (error) {
         returnErrors(error, res);
+    }
+}
+
+exports.addComment = async (req, res) => {
+    if(!req.body.body) setErrors(400, 'All fields are required');
+    const post = await postModel.findById(req.params.id);
+    if(!post) setErrors(404, 'Post not found');
+    const newComment = commentModel({
+        post: req.params.id,
+        user: req.userId,
+        body: req.body.body
+    });
+    let createdComment = await newComment.save();
+    createdComment = await createdComment.populate('user').execPopulate();
+    if(createdComment) {
+        post.comments.push(createdComment._doc._id);
+        const comentedPost = await post.save();
+        if(comentedPost) return res.status(200).json({
+            data: {
+                ...createdComment._doc,
+                user: {
+                    email: createdComment._doc.user.email,
+                    nickName: createdComment._doc.user.nickName
+                }
+            }
+        });
+        else setErrors(500, 'Something went wrong');
+    } else {
+        setErrors(500, 'Something went wrong');
     }
 }
