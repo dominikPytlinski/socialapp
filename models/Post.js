@@ -15,13 +15,13 @@ const postSchema = new Schema({
         required: true,
         ref: 'User'
     },
-    likeCount: {
-        type: Number,
-        required: true
+    likes: {
+        type: [Schema.Types.ObjectId],
+        default: []
     },
-    comentCount: {
-        type: Number,
-        required: true
+    comments: {
+        type: [Schema.Types.ObjectId],
+        default: []
     }
 }, {
     timestamps: true
