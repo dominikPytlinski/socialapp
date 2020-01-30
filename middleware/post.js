@@ -1,6 +1,7 @@
 //Models
 const postModel = require('../models/Post');
 const likeModel = require('../models/Like');
+const commentModel = require('../models/Comment');
 
 //Helpers
 const { returnErrors, setErrors } = require('../helpers/errors');
@@ -42,7 +43,7 @@ exports.getUserPosts = async (req, res, next) => {
                         email: post._doc.creator.email,
                         nickName: post._doc.creator.nickName
                     }
-                })
+                });
             });
             return res.status(200).json({
                 data: posts
@@ -107,7 +108,7 @@ exports.updatePost = async (req, res, next) => {
     try {
         const post = await postModel.findById(req.params.id);
         if(!post) return res.status(404).json({
-            data: 'No results'
+            data: 'Post not found'
         });
         if(post.creator != req.userId && req.role != 'admin') setErrors(401, 'Unathorized');
         const { title, body } = req.body;
@@ -138,31 +139,20 @@ exports.likePost = async (req, res, next) => {
     try {
         const like = await likeModel.findOne({
             user: req.userId,
-            post: req.body.post
+            post: req.params.id
         });
         if(like) return res.status(400).json({
             message: 'You have liked this post allready'
         });
-        const post = await postModel.findById(req.body.post);
+        const post = await postModel.findById(req.params.id);
         const newLike = likeModel({
             user: req.userId,
-            post: req.body.post 
+            post: req.params.id 
         });
-        let createdLike = await newLike.save();
-        createdLike = await createdLike.populate('user').execPopulate();
-        await postModel.findByIdAndUpdate(req.body.post, { likeCount: post._doc.likeCount++ });
+        const createdLike = await newLike.save();
+        await postModel.findByIdAndUpdate(req.params.id, { likeCount: post._doc.likeCount + 1 });
         if(createdLike) return res.status(201).json({
-            message: 'Liked',
-            data: {
-                ...createdLike._doc,
-                user: {
-                    _id: createdLike._doc.user._id,
-                    email: createdLike._doc.user.email,
-                    nickName: createdLike._doc.user.nickName,
-                    createdAt: createdLike._doc.user.createdAt,
-                    updatedAt: createdLike._doc.user.updatedAt
-                }
-            }
+            message: 'Liked'
         });
         else setErrors(500, 'Something went wrong');
     } catch (error) {
@@ -174,11 +164,82 @@ exports.unlikePost = async (req, res, next) => {
     try {
         const unliked = await likeModel.findOneAndDelete({
             user: req.userId,
-            post: req.body.post
+            post: req.params.id
         });
-        if(unliked) return res.status(200).json({
-            message: 'Unliked'
+        if(unliked) {
+            const post = await postModel.findById(req.params.id);
+            await postModel.findByIdAndUpdate(req.params.id, { likeCount: post._doc.likeCount - 1 });
+            return res.status(200).json({
+                message: 'Unliked'
+            });
+        } else {
+            setErrors(500, 'Something went wrong');
+        }
+    } catch (error) {
+        returnErrors(error, res);
+    }
+}
+
+exports.addComment = async (req, res, next) => {
+    try {
+        const { body } = req.body
+        if(!body) setErrors(400, 'All fields are required');
+        const post = await postModel.findById(req.params.id);
+        if(!post) return res.status(404).json({
+            data: 'Post not found'
         });
+        const newComment = commentModel({
+            post: req.params.id,
+            user: req.userId,
+            body: req.body.body
+        });
+        let createdComment = await newComment.save();
+        createdComment = await createdComment.populate('user').execPopulate();
+        createdComment = await createdComment.populate('post').execPopulate();
+        if(createdComment) {
+            await postModel.findByIdAndUpdate(req.params.id, { comentCount: post._doc.comentCount + 1 });
+            return res.status(201).json({
+                message: 'Comment added',
+                data: {
+                    ...createdComment._doc,
+                    user: {
+                        _id: createdComment._doc.user._id,
+                        email: createdComment._doc.user.email,
+                        nickName: createdComment._doc.user.nickName
+                    },
+                    post: {
+                        ...createdComment._doc.post._doc,
+                        comentCount: createdComment._doc.post._doc.comentCount + 1
+                    }
+                }
+            });
+        } else {
+            setErrors(500, 'Something went wrong');
+        }
+
+    } catch (error) {
+        if(error.kind == 'ObjectId') return res.status(404).json({
+            data: 'Post not found'
+        });
+        else returnErrors(error, res);
+    }
+}
+
+exports.deleteComment = async (req, res, next) => {
+    try {
+        const post = await postModel.findById(req.params.id);
+        if(!post) return res.status(404).json({
+            data: 'Post not found'
+        });
+        const deletedComment = await commentModel.findByIdAndDelete(req.params.commentId);
+        if(deletedComment) {
+            await postModel.findByIdAndUpdate(req.params.id, { commentCount: post._doc.commentCount - 1 });
+            return res.status(200).json({
+                message: 'Comment deleted successfully'
+            });
+        } else {
+            setErrors(500, 'Something went wrong');
+        }
     } catch (error) {
         returnErrors(error, res);
     }
