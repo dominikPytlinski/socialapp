@@ -55,7 +55,6 @@ exports.getAllPosts = async (req, res) => {
         const posts = await postModel.find({}).populate('creator');
         if(posts.length == 0) setErrors(404, 'Posts not found');
         posts.map(post => {
-            console.log(post._doc)
             outputPosts.push({
                 ...post._doc,
                 creator: {
@@ -94,6 +93,63 @@ exports.updatePost = async (req, res) => {
                 email: updatedPost._doc.creator.email,
                 nickName: updatedPost._doc.creator.nickName
             }
+        });
+        else setErrors(500, 'Something went wrong');
+    } catch (error) {
+        returnErrors(error, res);
+    }
+}
+
+exports.getUserPosts = async (req, res) => {
+    try {
+        const outputPosts = [];
+        const posts = await postModel.find({
+            creator: req.params.id
+        }).populate('creator');
+        if(posts.length == 0) setErrors(404, 'Posts not found');
+        posts.map(post => {
+            outputPosts.push({
+                ...post._doc,
+                creator: {
+                    email: post._doc.creator.email,
+                    nickName: post._doc.creator.nickName
+                },
+                likes: Object.keys(post._doc.likes).length,
+                comments: Object.keys(post._doc.comments).length
+            });
+        });
+        return res.status(200).json({
+            data: outputPosts
+        })
+    } catch (error) {
+        returnErrors(error, res);
+    }
+}
+
+exports.likePost = async (req, res) => {
+    try {
+        const post = await postModel.findById(req.params.id);
+        if(!post) setErrors(404, 'Post not found');
+        if(post.likes.includes(req.userId)) setErrors(400, 'You have liked this post allready');
+        post.likes.push(req.userId);
+        const likedPost = await post.save();
+        if(likedPost) return res.status(200).json({
+            message: 'Liked'
+        });
+        else setErrors(500, 'Something went wrong');
+    } catch (error) {
+        returnErrors(error, res);
+    }
+}
+
+exports.unlikePost = async (req, res) => {
+    try {
+        const post = await postModel.findById(req.params.id);
+        if(!post) setErrors(404, 'Post not found');
+        post.likes.pull(req.userId);
+        const unlikedPost = await post.save();
+        if(unlikedPost) return res.status(200).json({
+            message: 'Unliked'
         });
         else setErrors(500, 'Something went wrong');
     } catch (error) {
