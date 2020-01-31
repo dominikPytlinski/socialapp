@@ -15,18 +15,17 @@ exports.addPost = async (req, res, next) => {
             creator: req.userId
         });
         let createdPost = await newPost.save();
-        createdPost = await createdPost.populate('creator').execPopulate();
+        createdPost = await createdPost.populate({
+            path: 'creator',
+            model: 'User',
+            select: 'email nickName'
+        }).execPopulate();
         console.log(Object.keys(createdPost._doc.likes).length);
         if(createdPost) return res.status(201).json({
             message: 'Post created successfully',
             data: {
                 ...createdPost._doc,
-                likes: Object.keys(createdPost._doc.likes).length,
-                comments: Object.keys(createdPost._doc.comments).length,
-                creator: {
-                    email: createdPost._doc.creator.email,
-                    nickName: createdPost._doc.creator.nickName
-                }
+                likes: Object.keys(createdPost._doc.likes).length
             }
         });
         else setErrors(500, 'Something went wrong');
@@ -53,7 +52,9 @@ exports.deletePost = async (req, res, next) => {
 exports.getAllPosts = async (req, res, next) => {
     try {
         const outputPosts = [];
-        const posts = await postModel.find({}).populate([
+        const posts = await postModel.find({})
+            .sort('-createdAt')
+            .populate([
             {
                 path: 'creator',
                 model: 'User',
