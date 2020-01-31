@@ -54,15 +54,26 @@ exports.deletePost = async (req, res) => {
 exports.getAllPosts = async (req, res) => {
     try {
         const outputPosts = [];
-        const posts = await postModel.find({}).populate('creator comments')
+        const posts = await postModel.find({}).populate([
+            {
+                path: 'creator',
+                model: 'User',
+                select: 'email nickName'
+            },
+            {
+                path: 'comments',
+                model: 'Comment',
+                populate: {
+                    path: 'user',
+                    model: 'User',
+                    select: 'email nickName'
+                }
+            }
+        ])
         if(posts.length == 0) setErrors(404, 'Posts not found');
         posts.map(async post => {
             outputPosts.push({
                 ...post._doc,
-                creator: {
-                    email: post._doc.creator.email,
-                    nickName: post._doc.creator.nickName
-                },
                 likes: Object.keys(post._doc.likes).length
             });
         });
