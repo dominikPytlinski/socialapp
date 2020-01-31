@@ -13,6 +13,6 @@ router.put('/:id', isLogged, updatePost);
 router.post('/:id/like', isLogged, likePost);
 router.post('/:id/unlike', isLogged, unlikePost);
 router.post('/:id', isLogged, addComment);
-// router.delete('/:id/comment/:commentId', isLogged, deleteComment);
+router.delete('/:id/comment/:commentId', isLogged, deleteComment);
 
 module.exports = router;

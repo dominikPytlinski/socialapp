@@ -4,9 +4,8 @@ const { setErrors, returnErrors } = require('../helpers/errors');
 //Models
 const postModel = require('../models/Post');
 const commentModel = require('../models/Comment');
-const userModel = require('../models/User');
 
-exports.addPost = async (req, res) => {
+exports.addPost = async (req, res, next) => {
     try {
         const { title, body } = req.body;
         if(!title || !body) setErrors(400, 'All fields are required');
@@ -36,7 +35,7 @@ exports.addPost = async (req, res) => {
     }
 }
 
-exports.deletePost = async (req, res) => {
+exports.deletePost = async (req, res, next) => {
     try {
         const post = await postModel.findById(req.params.id);
         if(!post) return setErrors(404, 'Post not found');
@@ -51,7 +50,7 @@ exports.deletePost = async (req, res) => {
     }
 }
 
-exports.getAllPosts = async (req, res) => {
+exports.getAllPosts = async (req, res, next) => {
     try {
         const outputPosts = [];
         const posts = await postModel.find({}).populate([
@@ -85,7 +84,7 @@ exports.getAllPosts = async (req, res) => {
     }
 }
 
-exports.updatePost = async (req, res) => {
+exports.updatePost = async (req, res, next) => {
     try {
         const { title, body } = req.body;
         if(!title || !body) setErrors(400, 'All fields are required');
@@ -112,7 +111,7 @@ exports.updatePost = async (req, res) => {
     }
 }
 
-exports.getUserPosts = async (req, res) => {
+exports.getUserPosts = async (req, res, next) => {
     try {
         const outputPosts = [];
         const posts = await postModel.find({
@@ -138,7 +137,7 @@ exports.getUserPosts = async (req, res) => {
     }
 }
 
-exports.likePost = async (req, res) => {
+exports.likePost = async (req, res, next) => {
     try {
         const post = await postModel.findById(req.params.id);
         if(!post) setErrors(404, 'Post not found');
@@ -154,7 +153,7 @@ exports.likePost = async (req, res) => {
     }
 }
 
-exports.unlikePost = async (req, res) => {
+exports.unlikePost = async (req, res, next) => {
     try {
         const post = await postModel.findById(req.params.id);
         if(!post) setErrors(404, 'Post not found');
@@ -169,7 +168,7 @@ exports.unlikePost = async (req, res) => {
     }
 }
 
-exports.addComment = async (req, res) => {
+exports.addComment = async (req, res, next) => {
     if(!req.body.body) setErrors(400, 'All fields are required');
     const post = await postModel.findById(req.params.id);
     if(!post) setErrors(404, 'Post not found');
@@ -194,5 +193,23 @@ exports.addComment = async (req, res) => {
         else setErrors(500, 'Something went wrong');
     } else {
         setErrors(500, 'Something went wrong');
+    }
+}
+
+exports.deleteComment = async (req, res, next) => {
+    try {
+        const post = await postModel.findById(req.params.id);
+        if(!post) setErrors(404, 'Post not found');
+        const deletedComment = await commentModel.findByIdAndDelete(req.params.commentId);
+        if(deletedComment) {
+            post.comments.pull(req.params.commentId);
+            return res.status(200).json({
+                message: 'Comment deleted successfully'
+            });
+        } else {
+            setErrors(500, 'Somethin went wrong');
+        }
+    } catch (error) {
+        returnErrors(error, res);
     }
 }
