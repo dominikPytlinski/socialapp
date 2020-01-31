@@ -4,6 +4,7 @@ const { setErrors, returnErrors } = require('../helpers/errors');
 //Models
 const postModel = require('../models/Post');
 const commentModel = require('../models/Comment');
+const userModel = require('../models/User');
 
 exports.addPost = async (req, res) => {
     try {
@@ -53,17 +54,16 @@ exports.deletePost = async (req, res) => {
 exports.getAllPosts = async (req, res) => {
     try {
         const outputPosts = [];
-        const posts = await postModel.find({}).populate('creator');
+        const posts = await postModel.find({}).populate('creator comments')
         if(posts.length == 0) setErrors(404, 'Posts not found');
-        posts.map(post => {
+        posts.map(async post => {
             outputPosts.push({
                 ...post._doc,
                 creator: {
                     email: post._doc.creator.email,
                     nickName: post._doc.creator.nickName
                 },
-                likes: Object.keys(post._doc.likes).length,
-                comments: Object.keys(post._doc.comments).length
+                likes: Object.keys(post._doc.likes).length
             });
         });
         return res.status(200).json({
@@ -163,7 +163,6 @@ exports.addComment = async (req, res) => {
     const post = await postModel.findById(req.params.id);
     if(!post) setErrors(404, 'Post not found');
     const newComment = commentModel({
-        post: req.params.id,
         user: req.userId,
         body: req.body.body
     });

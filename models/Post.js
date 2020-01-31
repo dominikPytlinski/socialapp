@@ -19,11 +19,7 @@ const postSchema = new Schema({
         type: [Schema.Types.ObjectId],
         default: []
     },
-    comments: {
-        type: [Schema.Types.ObjectId],
-        default: [],
-        ref: 'Comment'
-    }
+    comments: [{ type: Schema.Types.ObjectId, ref: 'Comment' }]
 }, {
     timestamps: true
 });
