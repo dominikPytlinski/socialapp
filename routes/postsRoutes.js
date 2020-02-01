@@ -6,13 +6,12 @@ const { getAllPosts, addPost, deletePost, updatePost, getUserPosts, likePost, un
 const { isLogged } = require('../middleware/auth');
 
 router.get('/', getAllPosts);
-router.get('/user/:id', isLogged, getUserPosts);
 router.post('/', isLogged, addPost);
 router.delete('/:id', isLogged, deletePost);
 router.put('/:id', isLogged, updatePost);
-router.post('/:id/like', isLogged, likePost);
-router.post('/:id/unlike', isLogged, unlikePost);
-router.post('/:id', isLogged, addComment);
+router.post('/like', isLogged, likePost);
+router.post('/unlike', isLogged, unlikePost);
+router.post('/comment', isLogged, addComment);
 router.delete('/:id/comment/:commentId', isLogged, deleteComment);
 
 module.exports = router;

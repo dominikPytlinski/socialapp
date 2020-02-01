@@ -51,25 +51,57 @@ exports.deletePost = async (req, res, next) => {
 
 exports.getAllPosts = async (req, res, next) => {
     try {
+        const user = req.query.user;
+        const page = req.query.page ? parseInt(req.query.page) : 1;
+        const limit = req.query.limit ? parseInt(req.query.limit) : 100;
+        const startIndex = (page - 1) * limit;
+        const endIndex = page * limit;
         const outputPosts = [];
-        const posts = await postModel.find({})
+        let posts;
+        if(user) {
+            posts = await postModel.find({
+                creator: req.query.user
+            })
+            .limit(limit)
+            .skip(startIndex)
             .sort('-createdAt')
             .populate([
-            {
-                path: 'creator',
-                model: 'User',
-                select: 'email nickName'
-            },
-            {
-                path: 'comments',
-                model: 'Comment',
-                populate: {
-                    path: 'user',
+                {
+                    path: 'creator',
                     model: 'User',
                     select: 'email nickName'
+                }, {
+                    path: 'comments',
+                    model: 'Comment',
+                    populate: {
+                        path: 'user',
+                        model: 'User',
+                        select: 'email nickName'
+                    }
                 }
-            }
-        ])
+            ]);
+        } else {
+            posts = await postModel.find({})
+            .sort('-createdAt')
+            .limit(limit)
+            .skip(startIndex)
+            .populate([
+                {
+                    path: 'creator',
+                    model: 'User',
+                    select: 'email nickName'
+                },
+                {
+                    path: 'comments',
+                    model: 'Comment',
+                    populate: {
+                        path: 'user',
+                        model: 'User',
+                        select: 'email nickName'
+                    }
+                }
+            ]);
+        }
         if(posts.length == 0) setErrors(404, 'Posts not found');
         posts.map(async post => {
             outputPosts.push({
@@ -81,7 +113,10 @@ exports.getAllPosts = async (req, res, next) => {
             data: outputPosts
         })
     } catch (error) {
-        returnErrors(error, res);
+        if(error.kind == 'ObjectId') return res.status(400).json({ 
+            error: `${req.query.user} is not a valid value` 
+        });
+        else returnErrors(error, res);
     }
 }
 
@@ -112,35 +147,9 @@ exports.updatePost = async (req, res, next) => {
     }
 }
 
-exports.getUserPosts = async (req, res, next) => {
-    try {
-        const outputPosts = [];
-        const posts = await postModel.find({
-            creator: req.params.id
-        }).populate('creator');
-        if(posts.length == 0) setErrors(404, 'Posts not found');
-        posts.map(post => {
-            outputPosts.push({
-                ...post._doc,
-                creator: {
-                    email: post._doc.creator.email,
-                    nickName: post._doc.creator.nickName
-                },
-                likes: Object.keys(post._doc.likes).length,
-                comments: Object.keys(post._doc.comments).length
-            });
-        });
-        return res.status(200).json({
-            data: outputPosts
-        })
-    } catch (error) {
-        returnErrors(error, res);
-    }
-}
-
 exports.likePost = async (req, res, next) => {
     try {
-        const post = await postModel.findById(req.params.id);
+        const post = await postModel.findById(req.body.post);
         if(!post) setErrors(404, 'Post not found');
         if(post.likes.includes(req.userId)) setErrors(400, 'You have liked this post allready');
         post.likes.push(req.userId);
@@ -156,7 +165,7 @@ exports.likePost = async (req, res, next) => {
 
 exports.unlikePost = async (req, res, next) => {
     try {
-        const post = await postModel.findById(req.params.id);
+        const post = await postModel.findById(req.body.post);
         if(!post) setErrors(404, 'Post not found');
         post.likes.pull(req.userId);
         const unlikedPost = await post.save();
@@ -170,30 +179,35 @@ exports.unlikePost = async (req, res, next) => {
 }
 
 exports.addComment = async (req, res, next) => {
-    if(!req.body.body) setErrors(400, 'All fields are required');
-    const post = await postModel.findById(req.params.id);
-    if(!post) setErrors(404, 'Post not found');
-    const newComment = commentModel({
-        user: req.userId,
-        body: req.body.body
-    });
-    let createdComment = await newComment.save();
-    createdComment = await createdComment.populate('user').execPopulate();
-    if(createdComment) {
-        post.comments.push(createdComment._doc._id);
-        const comentedPost = await post.save();
-        if(comentedPost) return res.status(200).json({
-            data: {
-                ...createdComment._doc,
-                user: {
-                    email: createdComment._doc.user.email,
-                    nickName: createdComment._doc.user.nickName
-                }
-            }
+    try {
+        const { post, body } = req.body;
+        if(!post || !body) setErrors(400, 'All fields are required');
+        const postToComment = await postModel.findById(post);
+        if(!postToComment) setErrors(404, 'Post not found');
+        const newComment = commentModel({
+            user: req.userId,
+            body: body
         });
-        else setErrors(500, 'Something went wrong');
-    } else {
-        setErrors(500, 'Something went wrong');
+        let createdComment = await newComment.save();
+        createdComment = await createdComment
+            .populate({
+                path: 'user',
+                model: 'User',
+                select: 'email nickName'
+            })
+            .execPopulate();
+        if(createdComment) {
+            postToComment.comments.push(createdComment._doc._id);
+            const comentedPost = await postToComment.save();
+            if(comentedPost) return res.status(200).json({
+                data: createdComment
+            });
+            else setErrors(500, 'Something went wrong');
+        } else {
+            setErrors(500, 'Something went wrong');
+        }
+    } catch (error) {
+        returnErrors(error, res);
     }
 }
 
@@ -204,6 +218,7 @@ exports.deleteComment = async (req, res, next) => {
         const deletedComment = await commentModel.findByIdAndDelete(req.params.commentId);
         if(deletedComment) {
             post.comments.pull(req.params.commentId);
+            await post.save();
             return res.status(200).json({
                 message: 'Comment deleted successfully'
             });
