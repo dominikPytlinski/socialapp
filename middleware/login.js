@@ -1,10 +1,10 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-const userModel = require('../models/User');
+const User = require('../models/User');
 
 exports.loginUser = async (req, res, next) => {
-    const user = await userModel.findOne({
+    const user = await User.findOne({
         email: req.body.email
     }).populate('role');
     if(!user) return res.status(400).json({

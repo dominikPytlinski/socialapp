@@ -1,8 +1,8 @@
 const bcrypt = require('bcryptjs');
 
 //Models
-const userModel = require('../models/User');
-const roleModel = require('../models/Role');
+const User = require('../models/User');
+const Role = require('../models/Role');
 
 //Helpers
 const { returnErrors, setErrors } = require('../helpers/errors');
@@ -12,18 +12,18 @@ exports.addUser = async (req, res, next) => {
         const { email, nickName, password, confirmPassword, roleId } = req.body;
         if(!email || !nickName || !password || !confirmPassword || !roleId) setErrors(400, 'All fields are required')
         if(password != confirmPassword) setErrors(400, 'Passwords must match');
-        const role = await roleModel.findById(roleId);
+        const role = await Role.findById(roleId);
         if(role.role === 'admin' && req.role != 'admin') setErrors(400, 'One of the params has incorrect value');
-        const userEmail = await userModel.find({
+        const userEmail = await User.find({
             email: email
         });
         if(userEmail.length > 0) setErrors(400, 'Email allresdy exists');
-        const userNickName = await userModel.find({
+        const userNickName = await User.find({
             nickName: nickName
         });
         if(userNickName.length > 0) setErrors(400, 'Nickname allready exists');
         const passwordHashed = await bcrypt.hash(password, 10)
-        const newUser = new userModel({
+        const newUser = new User({
             email: email,
             password: passwordHashed,
             nickName: nickName,
@@ -57,7 +57,7 @@ exports.getAllUsers = async (req, res, next) => {
     try {
         if(req.role != 'admin') setErrors(401, 'Unauthorized');
         const users = [];
-        const allUsers = await userModel.find({}).populate('role');
+        const allUsers = await User.find({}).populate('role');
         if(allUsers.length > 0) {
             allUsers.map(user => {
                 users.push({
@@ -82,7 +82,7 @@ exports.getAllUsers = async (req, res, next) => {
 
 exports.getSingleUser = async (req, res, next) => {
     try {
-        const user = await userModel.findById(req.params.id).populate('role');
+        const user = await User.findById(req.params.id).populate('role');
         if(user) {
             return res.status(200).json({
                 data: {
@@ -131,7 +131,7 @@ exports.updateUser = async (req, res, next) => {
             nickName: nickName,
             roleId: roleId
         };
-        const updatedUser = await userModel.findByIdAndUpdate(req.params.id, user, { new: true }).populate('role');
+        const updatedUser = await User.findByIdAndUpdate(req.params.id, user, { new: true }).populate('role');
         return res.status(200).json({
             message: 'User updated successfully',
             data: {
@@ -151,7 +151,7 @@ exports.updateUser = async (req, res, next) => {
 exports.deleteUser = async (req, res, next) => {
     try {
         if(req.role != 'admin' && req.userId != req.params.id) setErrors(401, 'Unauthorized');
-        const deletedUser = await userModel.findByIdAndDelete(req.params.id);
+        const deletedUser = await User.findByIdAndDelete(req.params.id);
         if(deletedUser) return res.status(200).json({message: 'User deleted successfully'});
         else setErrors(400, 'Bad request');
     } catch (error) {

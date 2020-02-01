@@ -2,24 +2,26 @@
 const { setErrors, returnErrors } = require('../helpers/errors');
 
 //Models
-const postModel = require('../models/Post');
-const commentModel = require('../models/Comment');
+const Post = require('../models/Post');
+const Comment = require('../models/Comment');
 
 exports.addPost = async (req, res, next) => {
     try {
         const { title, body } = req.body;
         if(!title || !body) setErrors(400, 'All fields are required');
-        const newPost = postModel({
+        const newPost = Post({
             title: title,
             body: body,
             creator: req.userId
         });
         let createdPost = await newPost.save();
-        createdPost = await createdPost.populate({
-            path: 'creator',
-            model: 'User',
-            select: 'email nickName'
-        }).execPopulate();
+        createdPost = await createdPost
+            .populate({
+                path: 'creator',
+                model: 'User',
+                select: 'email nickName'
+            })
+            .execPopulate();
         console.log(Object.keys(createdPost._doc.likes).length);
         if(createdPost) return res.status(201).json({
             message: 'Post created successfully',
@@ -36,10 +38,10 @@ exports.addPost = async (req, res, next) => {
 
 exports.deletePost = async (req, res, next) => {
     try {
-        const post = await postModel.findById(req.params.id);
+        const post = await Post.findById(req.params.id);
         if(!post) return setErrors(404, 'Post not found');
         if(post.creator != req.userId && req.role != 'admin') setErrors(401, 'Unathorized');
-        const deletedPost = await postModel.findByIdAndDelete(req.params.id);
+        const deletedPost = await Post.findByIdAndDelete(req.params.id);
         if(deletedPost) return res.status(200).json({
             message: 'Post deleted successfully'
         });
@@ -59,7 +61,7 @@ exports.getAllPosts = async (req, res, next) => {
         const outputPosts = [];
         let posts;
         if(user) {
-            posts = await postModel.find({
+            posts = await Post.find({
                 creator: req.query.user
             })
             .limit(limit)
@@ -81,7 +83,7 @@ exports.getAllPosts = async (req, res, next) => {
                 }
             ]);
         } else {
-            posts = await postModel.find({})
+            posts = await Post.find({})
             .sort('-createdAt')
             .limit(limit)
             .skip(startIndex)
@@ -124,22 +126,23 @@ exports.updatePost = async (req, res, next) => {
     try {
         const { title, body } = req.body;
         if(!title || !body) setErrors(400, 'All fields are required');
-        const post = await postModel.findById(req.params.id);
+        const post = await Post.findById(req.params.id);
         if(!post) setErrors(404, 'Post not found');
         if(post.creator != req.userId && req.role != 'admin') setErrors(401, 'Unathorized');
         const newPost = {
             title: title,
             body: body
         }
-        const updatedPost = await postModel.findByIdAndUpdate(req.params.id, newPost, { new: true }).populate('creator');
+        const updatedPost = await Post
+            .findByIdAndUpdate(req.params.id, newPost, { new: true })
+            .populate({
+                path: 'creator',
+                model: 'User',
+                select: 'email nickName'
+            });
         if(updatedPost) return res.status(200).json({
             ...updatedPost._doc,
             likes: Object.keys(updatedPost._doc.likes).length,
-            comments: Object.keys(updatedPost._doc.comments).length,
-            creator: {
-                email: updatedPost._doc.creator.email,
-                nickName: updatedPost._doc.creator.nickName
-            }
         });
         else setErrors(500, 'Something went wrong');
     } catch (error) {
@@ -149,7 +152,7 @@ exports.updatePost = async (req, res, next) => {
 
 exports.likePost = async (req, res, next) => {
     try {
-        const post = await postModel.findById(req.body.post);
+        const post = await Post.findById(req.body.post);
         if(!post) setErrors(404, 'Post not found');
         if(post.likes.includes(req.userId)) setErrors(400, 'You have liked this post allready');
         post.likes.push(req.userId);
@@ -165,7 +168,7 @@ exports.likePost = async (req, res, next) => {
 
 exports.unlikePost = async (req, res, next) => {
     try {
-        const post = await postModel.findById(req.body.post);
+        const post = await Post.findById(req.body.post);
         if(!post) setErrors(404, 'Post not found');
         post.likes.pull(req.userId);
         const unlikedPost = await post.save();
@@ -182,9 +185,9 @@ exports.addComment = async (req, res, next) => {
     try {
         const { post, body } = req.body;
         if(!post || !body) setErrors(400, 'All fields are required');
-        const postToComment = await postModel.findById(post);
+        const postToComment = await Post.findById(post);
         if(!postToComment) setErrors(404, 'Post not found');
-        const newComment = commentModel({
+        const newComment = Comment({
             user: req.userId,
             body: body
         });
@@ -213,9 +216,9 @@ exports.addComment = async (req, res, next) => {
 
 exports.deleteComment = async (req, res, next) => {
     try {
-        const post = await postModel.findById(req.params.id);
+        const post = await Post.findById(req.params.id);
         if(!post) setErrors(404, 'Post not found');
-        const deletedComment = await commentModel.findByIdAndDelete(req.params.commentId);
+        const deletedComment = await Comment.findByIdAndDelete(req.params.commentId);
         if(deletedComment) {
             post.comments.pull(req.params.commentId);
             await post.save();
