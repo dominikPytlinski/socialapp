@@ -67,48 +67,28 @@ exports.getAllPosts = async (req, res, next) => {
             .limit(limit)
             .skip(startIndex)
             .sort('-createdAt')
-            .populate([
-                {
-                    path: 'creator',
-                    model: 'User',
-                    select: 'email nickName'
-                }, {
-                    path: 'comments',
-                    model: 'Comment',
-                    populate: {
-                        path: 'user',
-                        model: 'User',
-                        select: 'email nickName'
-                    }
-                }
-            ]);
+            .populate({
+                path: 'creator',
+                model: 'User',
+                select: 'email nickName'
+            });
         } else {
             posts = await Post.find({})
             .sort('-createdAt')
             .limit(limit)
             .skip(startIndex)
-            .populate([
-                {
-                    path: 'creator',
-                    model: 'User',
-                    select: 'email nickName'
-                },
-                {
-                    path: 'comments',
-                    model: 'Comment',
-                    populate: {
-                        path: 'user',
-                        model: 'User',
-                        select: 'email nickName'
-                    }
-                }
-            ]);
+            .populate({
+                path: 'creator',
+                model: 'User',
+                select: 'email nickName'
+            });
         }
         if(posts.length == 0) setErrors(404, 'Posts not found');
         posts.map(async post => {
             outputPosts.push({
                 ...post._doc,
-                likes: Object.keys(post._doc.likes).length
+                likes: Object.keys(post._doc.likes).length,
+                comments: Object.keys(post._doc.comments).length
             });
         });
         return res.status(200).json({
@@ -119,6 +99,36 @@ exports.getAllPosts = async (req, res, next) => {
             error: `${req.query.user} is not a valid value` 
         });
         else returnErrors(error, res);
+    }
+}
+
+exports.getSinglePost = async (req, res, next) => {
+    try {
+        const post = await Post.findById(req.params.id)
+        .populate([
+            {
+                path: 'creator',
+                model: 'User',
+                select: 'email nickName'
+            }, {
+                path: 'comments',
+                model: 'Comment',
+                populate: {
+                    path: 'user',
+                    model: 'User',
+                    select: 'email nickName'
+                }
+            }
+        ]);
+        if(!post) setErrors(404, 'Post not found');
+        return res.status(200).json({
+            data: {
+                ...post._doc,
+                likes: Object.keys(post._doc.likes).length
+            }
+        })
+    } catch (error) {
+        returnErrors(error, res);
     }
 }
 
