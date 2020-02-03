@@ -193,13 +193,12 @@ exports.unlikePost = async (req, res, next) => {
 
 exports.addComment = async (req, res, next) => {
     try {
-        const { post, body } = req.body;
-        if(!post || !body) setErrors(400, 'All fields are required');
-        const postToComment = await Post.findById(post);
+        if(!req.body.body) setErrors(400, 'All fields are required');
+        const postToComment = await Post.findById(req.params.id);
         if(!postToComment) setErrors(404, 'Post not found');
         const newComment = Comment({
             user: req.userId,
-            body: body
+            body: req.body.body
         });
         let createdComment = await newComment.save();
         createdComment = await createdComment
@@ -238,6 +237,27 @@ exports.deleteComment = async (req, res, next) => {
         } else {
             setErrors(500, 'Somethin went wrong');
         }
+    } catch (error) {
+        returnErrors(error, res);
+    }
+}
+
+exports.updateComment = async (req, res, next) => {
+    try {
+        const post = await Post.findById(req.params.id);
+        if(!post) setErrors(404, 'Post not found');
+        const comment = await Comment.findById(req.params.commentId);
+        if(comment._doc.user != req.userId) setErrors(401, 'Unauthorized');
+        const updatedComment = await Comment.findByIdAndUpdate(req.params.commentId, { body: req.body.body }, { new: true })
+            .populate({
+                path: 'user',
+                model: 'User',
+                select: 'email nickName'
+            });
+        if(updatedComment) return res.status(200).json({
+            data: updatedComment
+        });
+        else setErrors(500, 'Something went wrong');
     } catch (error) {
         returnErrors(error, res);
     }

@@ -2,7 +2,18 @@ const express = require('express');
 const router = express.Router();
 
 //Middleware
-const { getAllPosts, addPost, deletePost, updatePost, getUserPosts, likePost, unlikePost, addComment, deleteComment, getSinglePost } = require('../middleware/post');
+const { 
+    getAllPosts,
+    addPost,
+    deletePost,
+    updatePost,
+    likePost,
+    unlikePost,
+    addComment,
+    deleteComment,
+    getSinglePost,
+    updateComment
+} = require('../middleware/post');
 const { isLogged } = require('../middleware/auth');
 
 router.get('/', getAllPosts);
@@ -12,9 +23,10 @@ router.post('/', isLogged, addPost);
 
 router.post('/like', isLogged, likePost);
 router.post('/unlike', isLogged, unlikePost);
-router.post('/comment', isLogged, addComment);
+router.post('/:id/comment', isLogged, addComment);
 router.put('/:id', isLogged, updatePost);
 router.delete('/:id', isLogged, deletePost);
 router.delete('/:id/comment/:commentId', isLogged, deleteComment);
+router.put('/:id/comment/:commentId', isLogged, updateComment)
 
 module.exports = router;
