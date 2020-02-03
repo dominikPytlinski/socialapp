@@ -14,6 +14,10 @@ const userSchema = new Schema({
         type: String,
         required: true
     },
+    image: {
+        type: String,
+        default: 'http://localhost:4000/uploads/no-image.png'
+    },
     role: {
         type: Schema.Types.ObjectId,
         required: true,
