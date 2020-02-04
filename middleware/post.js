@@ -70,7 +70,7 @@ exports.getAllPosts = async (req, res, next) => {
             .populate({
                 path: 'creator',
                 model: 'User',
-                select: 'email nickName'
+                select: 'email nickName image'
             });
         } else {
             posts = await Post.find({})
@@ -80,7 +80,7 @@ exports.getAllPosts = async (req, res, next) => {
             .populate({
                 path: 'creator',
                 model: 'User',
-                select: 'email nickName'
+                select: 'email nickName image'
             });
         }
         if(posts.length == 0) setErrors(404, 'Posts not found');

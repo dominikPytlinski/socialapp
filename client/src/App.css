@@ -1,38 +1,147 @@
-.App {
-  text-align: center;
+* {
+  margin: 0;
+  padding: 0;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+body {
+  background-color: #eee;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+a {
+  text-decoration: none;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+header.main-nav {
+  height: 7vh;
+  background-color: #5175e9;
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
 }
 
-.App-link {
-  color: #61dafb;
+header.main-nav .logo {
+  margin-left: 5vw;
+  font-size: 2rem;
 }
 
-@keyframes App-logo-spin {
-  from {
+header.main-nav ul {
+  margin-right: 5vw;
+  list-style-type: none;
+  display: flex;
+  height: 100%;
+}
+
+header.main-nav ul li {
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+}
+
+.nav-link {
+  color: #fff;
+}
+
+header.main-nav ul li:hover {
+  background-color: #6286fa;
+}
+
+.selected {
+  color: yellow;
+}
+
+.container {
+  margin: 7vh auto 0 auto;
+  max-width: 1200px;
+}
+
+.wrapper {
+  display: flex;
+  padding: 10px;
+}
+
+.posts {
+  width: 60%;
+}
+
+.posts > div {
+  padding: 1rem;
+  display: flex;
+  background-color: #fff;
+  margin-bottom: 10px;
+}
+
+.posts > div > div {
+  width: 100%;
+  padding: 1rem;
+}
+
+.posts > div > div > span > a {
+  color: rgb(81, 117, 233);
+  font-weight: 700;
+  font-size: 1.3rem;
+}
+
+.posts > div > div > h4 {
+  margin-top: 5px;
+}
+
+.posts > div > div> p {
+  margin-top: 10px;
+}
+
+.profile {
+  width: 40%;
+}
+
+.user-image {
+  max-width: 20%;
+  height: auto;
+}
+
+.loader,
+.loader:after {
+  border-radius: 50%;
+  width: 10em;
+  height: 10em;
+}
+.loader {
+  margin: 60px auto;
+  font-size: 10px;
+  position: relative;
+  text-indent: -9999em;
+  border-top: 1.1em solid rgb(81, 117, 233);
+  border-right: 1.1em solid rgb(81, 117, 233);
+  border-bottom: 1.1em solid rgb(81, 117, 233);
+  border-left: 1.1em solid #ffffff;
+  -webkit-transform: translateZ(0);
+  -ms-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-animation: load8 1.1s infinite linear;
+  animation: load8 1.1s infinite linear;
+  background-color: #eee !important;
+}
+@-webkit-keyframes load8 {
+  0% {
+    -webkit-transform: rotate(0deg);
     transform: rotate(0deg);
   }
-  to {
+  100% {
+    -webkit-transform: rotate(360deg);
     transform: rotate(360deg);
   }
 }
+@keyframes load8 {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+
