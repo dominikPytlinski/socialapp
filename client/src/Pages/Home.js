@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
 import axios from 'axios';
 import Loading from '../Components/Loading';
+import PostListItem from '../Components/PostListItem';
+import Profile from '../Components/Profile';
 
 class Home extends Component {
     constructor(props) {
@@ -37,22 +38,11 @@ class Home extends Component {
                         {this.state.loading ? (
                             <Loading />
                         ) : (
-                            this.state.posts.map(post => {
-                                return (
-                                <div key={post._id}>
-                                    <img src={post.creator.image} alt="user" className="user-image" />
-                                    <div>
-                                        <span><Link to="#">{post.creator.nickName}</Link></span>
-                                        <h4>{post.title}</h4>
-                                        <p>{post.body}</p>
-                                    </div>
-                                </div>
-                                )
-                            })
+                            <PostListItem posts={this.state.posts} />
                         )}
                     </div>
                     <div className="profile">
-                        profile
+                        <Profile />
                     </div>
                 </div>
             </main>
