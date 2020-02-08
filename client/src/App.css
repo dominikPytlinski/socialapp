@@ -120,6 +120,52 @@ a {
 }
 /* Home Ends */
 
+/* Login */
+.login-form {
+  width: 50%;
+  padding: 2rem;
+  margin: 0 auto;
+}
+
+.form-control {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+}
+
+.form-control label {
+  padding: .2rem;
+}
+
+.form-control input {
+  padding: .2rem;
+  border: none;
+  background-color: transparent;
+  outline: none;
+  border-bottom: 1px solid #444;
+}
+
+.btn {
+  padding: .4rem;
+  max-width: 25%;
+  border-radius: 5px;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  letter-spacing: 1px;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  border: 1px solid var(--primary-color);
+  color: #fff;
+}
+
+.btn-primary:active {
+  border: 2px solid var(--info-color);
+}
+/* Login Ends */
+
 /* Spinner */
 .loader {
     margin: 100px auto;
