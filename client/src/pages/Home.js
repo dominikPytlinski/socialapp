@@ -1,22 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useEffect } from 'react';
+import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
+import { getPosts } from '../redux/actions/dataActions';
 import Loading from '../components/Loading';
 import PostsList from '../components/PostsList';
 
-const Home = () => {
-    const [posts, setPosts] = useState([]);
-    const [loading, setLoading] = useState(false);
-
+const Home = (props) => {
+    const { data: { loading, posts }, getPosts} = props;
+    
     useEffect(() => {
-        setLoading(true);
-        axios.get('http://localhost:4000/posts')
-            .then(res => {
-                setPosts(res.data.data);
-                setLoading(false);
-            })
-            .catch(err => console.log(err));
-    }, []);
-
+        getPosts();
+    }, [getPosts]);
+    
     return (
         <main className="container">
             <div className="posts">
@@ -33,4 +28,17 @@ const Home = () => {
     )
 }
 
-export default Home;
+Home.propTypes = {
+    getPosts: PropTypes.func.isRequired,
+    data: PropTypes.object.isRequired
+}
+
+const mapStateToProps = state => ({
+    data: state.data
+});
+
+const mapActionsToProps = {
+    getPosts
+}
+
+export default connect(mapStateToProps, mapActionsToProps)(Home);

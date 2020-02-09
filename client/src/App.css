@@ -166,9 +166,21 @@ a {
 }
 /* Login Ends */
 
+/* Curtain */
+.curtain {
+  position: fixed;
+  top: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, .6);
+  width: 100vw;
+  height: 100vh;
+  z-index: 2;
+}
+/* Curtain Ends */
+
 /* Spinner */
 .loader {
-    margin: 100px auto;
+    margin: 20rem auto;
     font-size: 25px;
     width: 1em;
     height: 1em;
