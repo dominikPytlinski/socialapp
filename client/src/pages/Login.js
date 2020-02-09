@@ -1,36 +1,21 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
+import { loginUser } from '../redux/actions/userActions';
 import CurtainLoading from '../components/CurtainLoading';
 
-const Login = () => {
+const Login = (props) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [loading, setLoading] = useState(false);
-
-    const handleChangeEmail = (e) => {
-        setEmail(e.target.value);
-    }
-
-    const handleChangePassword = (e) => {
-        setPassword(e.target.value)
-    }
+    const { user: { loading, logged, role, token}, loginUser } = props
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        setLoading(true);
         const loginData = {
             email: email,
             password: password
         }
-        axios.post('http://localhost:4000/login', loginData)
-            .then(res => {
-                setLoading(false);
-                console.log(res.data)
-            })
-            .catch(err => {
-                setLoading(false);
-                console.log(err)
-            });
+        loginUser(loginData);
     }
 
     return (
@@ -42,13 +27,13 @@ const Login = () => {
                         <label htmlFor="email">
                             Email:
                         </label>
-                        <input type="email" name="email" id="email" value={email} onChange={handleChangeEmail} />
+                        <input type="email" name="email" id="email" value={email} onChange={e => setEmail(e.target.value)} />
                     </div>
                     <div className="form-control">
                         <label htmlFor="password">
                             Hasło:
                         </label>
-                        <input type="password" name="password" id="password" value={password} onChange={handleChangePassword} />
+                        <input type="password" name="password" id="password" value={password} onChange={e => setPassword(e.target.value)} />
                     </div>
                     <div className="form-control">
                         <button className="btn btn-primary" type="submit">
@@ -61,4 +46,17 @@ const Login = () => {
     )
 }
 
-export default Login;
+Login.propTypes = {
+    user: PropTypes.object.isRequired,
+    loginUser: PropTypes.func.isRequired
+}
+
+const mapStateToProps = state => ({
+    user: state.user
+});
+
+const mapActionToProps = {
+    loginUser
+}
+
+export default connect(mapStateToProps, mapActionToProps)(Login);
