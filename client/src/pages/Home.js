@@ -5,20 +5,18 @@ import { getPosts } from '../redux/actions/dataActions';
 import Loading from '../components/Loading';
 import PostsList from '../components/PostsList';
 
-const Home = (props) => {
-    const { data: { loading, posts }, getPosts} = props;
-    
+const Home = ({ data, getPosts }) => {    
     useEffect(() => {
-        getPosts();
+       getPosts(); 
     }, [getPosts]);
     
     return (
         <main className="container">
             <div className="posts">
-                {loading ? (
+                {data.loading ? (
                     <Loading />
                 ) : (
-                    <PostsList posts={posts} />
+                    <PostsList posts={data.posts} />
                 )}
             </div>
             <div className="profile">
@@ -29,8 +27,8 @@ const Home = (props) => {
 }
 
 Home.propTypes = {
-    getPosts: PropTypes.func.isRequired,
-    data: PropTypes.object.isRequired
+    data: PropTypes.object.isRequired,
+    getPosts: PropTypes.func.isRequired
 }
 
 const mapStateToProps = state => ({

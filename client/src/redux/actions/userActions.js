@@ -1,26 +1,63 @@
-import { SET_USER, LOADING_USER, SET_ERRORS } from '../types';
+import { SET_USER, LOADING_UI, SET_ERRORS, CLEAR_ERRORS, STOP_LOADING } from '../types';
 import axios from 'axios';
 
-export const loginUser = (loginData) => (dispach) => {
-    dispach({
-        type: LOADING_USER
+export const loginUser = (loginData, history) => (dispatch) => {
+    dispatch({
+        type: LOADING_UI
     });
     axios.post('http://localhost:4000/login', loginData)
         .then(res => {
-            dispach({
+            dispatch({
+                type: STOP_LOADING
+            });
+            dispatch({
                 type: SET_USER,
-                payload: res.data
+                payload: res.data.data
             });
             const auth = {
                 token: res.data.data.token,
-                role: res.data.data.role.role
+                role: res.data.data.user.role.role,
+                id: res.data.data.user._id
             }
+            setAuthorizationHeader(res.data.data.token);
             sessionStorage.setItem('auth', JSON.stringify(auth));
+            history.push('/');
         })
         .catch(err => {
-            dispach({
+            dispatch({
                 type: SET_ERRORS,
-                payload: err
-            })
+                payload: err.response
+            });
         });
+}
+
+export const getUserData = (auth) => (dispatch) => {
+    dispatch({
+        type: LOADING_UI
+    });
+    axios.get(`http://localhost:4000/users/${auth.id}`)
+        .then(res => {
+            const data = {
+                user: res.data.data
+            }
+            dispatch({
+                type: STOP_LOADING
+            });
+            dispatch({
+                type: SET_USER,
+                payload: data
+            })
+        })
+        .catch(err => console.log(err));
+}
+
+export const clearUserErrors = () => (dispatch) => {
+    dispatch({
+        type: CLEAR_ERRORS
+    });
+}
+
+const setAuthorizationHeader = (token) => {
+    const authToken = `Bearer ${token}`;
+    axios.defaults.headers.common['Authorization'] = authToken;
 }

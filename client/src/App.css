@@ -29,6 +29,15 @@ a {
     text-decoration: none;
 }
 
+.alert-message {
+  background-color: rgba(255, 68, 68, .7);
+  padding: .5rem;
+  border-radius: 5px;
+  color: var(--dangerr-color-dark);
+  border: 2px solid var(--dangerr-color-dark);
+  text-align: center;
+}
+
 /* Main Header */
 .header {
     position: fixed;
@@ -40,6 +49,7 @@ a {
     color: #fff;
     display: flex;
     justify-content: space-between;
+    z-index: 2;
 }
 
 .logo {
@@ -85,6 +95,8 @@ a {
 /* Home */
 .posts {
     width: 69%;
+    position: relative;
+    min-height: 20rem;
 }
 
 .posts-list-item {
@@ -180,12 +192,15 @@ a {
 
 /* Spinner */
 .loader {
-    margin: 20rem auto;
+    margin: 0 auto;
     font-size: 25px;
     width: 1em;
     height: 1em;
     border-radius: 50%;
-    position: relative;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%);
     text-indent: -9999em;
     -webkit-animation: load5 1.1s infinite ease;
     animation: load5 1.1s infinite ease;

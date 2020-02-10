@@ -1,10 +1,13 @@
-import { SET_USER, LOADING_USER } from '../types';
+import { SET_USER } from '../types';
 
 const initialState = {
-    loading: false,
-    logged: sessionStorage.getItem('auth') ? true : false,
+    logged: false,
     role: null,
-    token: null
+    token: null,
+    image: null,
+    email: null,
+    nickName: null,
+    createdAt: null
 }
 
 export default function(state = initialState, action) {
@@ -12,14 +15,13 @@ export default function(state = initialState, action) {
         case SET_USER:
             return {
                 ...state,
-                loading: false,
                 logged: true,
-                role: action.payload.data.role.role
-            }
-        case LOADING_USER:
-            return {
-                ...state,
-                loading: true
+                role: action.payload.user.role.role,
+                token: action.payload.token,
+                image: action.payload.user.image,
+                email: action.payload.user.email,
+                nickName: action.payload.user.nickName,
+                createdAt: action.payload.user.createdAt
             }
         default:
             return state;
