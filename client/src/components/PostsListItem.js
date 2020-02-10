@@ -1,8 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import dayjs from 'dayjs';
+import relativTime from 'dayjs/plugin/relativeTime';
 
-const PostsListItem = (props) => {
-    const { likes, comments, _id, title, body, cratedAt, updatedAt, creator } = props.post;
+const PostsListItem = ({ post: { likes, comments, _id, title, body, createdAt, updatedAt, creator }}) => {
+    dayjs.extend(relativTime);
     return (
         <div className="posts-list-item">
             <div className="img-wrapper">
@@ -10,6 +12,7 @@ const PostsListItem = (props) => {
             </div>
             <div className="post-details">
                 <h3><Link to="#" >{creator.nickName}</Link></h3>
+                <span className="date">{dayjs(createdAt).fromNow()}</span>
                 <p>{body}</p>
             </div>
         </div>
