@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { loginUser, clearUserErrors } from '../redux/actions/userActions';
 import Loading from '../components/Loading';
 
-const Login = ({user, UI,  loginUser, clearUserErrors, history}) => {
+const Login = ({UI, loginUser, clearUserErrors, history}) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 

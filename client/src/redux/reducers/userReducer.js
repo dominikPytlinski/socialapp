@@ -1,6 +1,7 @@
-import { SET_USER, CLEAR_USER,  } from '../types';
+import { SET_USER, CLEAR_USER, LOADING_USER,  } from '../types';
 
 const initialState = {
+    loading: false,
     logged: false,
     role: null,
     token: null,
@@ -12,9 +13,15 @@ const initialState = {
 
 export default function(state = initialState, action) {
     switch (action.type) {
+        case LOADING_USER:
+            return {
+                ...state,
+                loading: true
+            }
         case SET_USER:
             return {
                 ...state,
+                loading: false,
                 logged: true,
                 role: action.payload.user.role.role,
                 token: action.payload.token,
@@ -26,6 +33,7 @@ export default function(state = initialState, action) {
         case CLEAR_USER:
             return {
                 ...state,
+                loading: false,
                 logged: false,
                 role: null,
                 token: null,

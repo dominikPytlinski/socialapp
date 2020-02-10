@@ -1,4 +1,4 @@
-import { SET_USER, LOADING_UI, SET_ERRORS, CLEAR_ERRORS, STOP_LOADING, CLEAR_USER } from '../types';
+import { SET_USER, LOADING_USER, SET_ERRORS, CLEAR_ERRORS, STOP_LOADING_UI, CLEAR_USER, STOP_LOADING_USER, LOADING_UI } from '../types';
 import axios from 'axios';
 
 export const loginUser = (loginData, history) => (dispatch) => {
@@ -8,8 +8,8 @@ export const loginUser = (loginData, history) => (dispatch) => {
     axios.post('http://localhost:4000/login', loginData)
         .then(res => {
             dispatch({
-                type: STOP_LOADING
-            });
+                type: STOP_LOADING_UI
+            })
             dispatch({
                 type: SET_USER,
                 payload: res.data.data
@@ -25,6 +25,9 @@ export const loginUser = (loginData, history) => (dispatch) => {
         })
         .catch(err => {
             dispatch({
+                type: STOP_LOADING_UI
+            })
+            dispatch({
                 type: SET_ERRORS,
                 payload: err.response
             });
@@ -33,7 +36,7 @@ export const loginUser = (loginData, history) => (dispatch) => {
 
 export const getUserData = (auth) => (dispatch) => {
     dispatch({
-        type: LOADING_UI
+        type: LOADING_USER
     });
     axios.get(`http://localhost:4000/users/${auth.id}`)
         .then(res => {
@@ -41,14 +44,16 @@ export const getUserData = (auth) => (dispatch) => {
                 user: res.data.data
             }
             dispatch({
-                type: STOP_LOADING
-            });
-            dispatch({
                 type: SET_USER,
                 payload: data
             })
         })
-        .catch(err => console.log(err));
+        .catch(err => {
+            dispatch({
+                type: STOP_LOADING_USER
+            })
+            console.log(err)
+        });
 }
 
 export const clearUserErrors = () => (dispatch) => {

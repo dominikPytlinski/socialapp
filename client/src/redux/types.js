@@ -6,5 +6,5 @@ export const SET_ERRORS = 'SET_ERRORS';
 export const CLEAR_ERRORS = 'CLEAR_ERRORS';
 export const SET_USER = 'SET_USER';
 export const CLEAR_USER = 'CLEAR_USER';
-export const STOP_LOADING = 'STOP_LOADING';
-export const SET_PREV_USER = 'SET_PREV_USER';
+export const STOP_LOADING_UI = 'STOP_LOADING';
+export const STOP_LOADING_USER = 'STOP_LOADING_USER';

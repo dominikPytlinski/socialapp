@@ -10,17 +10,16 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import './App.css';
 
-const App = ({ getUserData, UI }) => {
+const App = ({ getUserData, user }) => {
   useEffect(() => {
     const auth = sessionStorage.getItem('auth');
-    console.log('auth')
     if(auth) getUserData(JSON.parse(auth));
   }, [getUserData]);
 
   return (
     <Fragment>
         <BrowserRouter>
-          {UI.loading ? (
+          {user.loading ? (
             <div className="curtain"><Loading /></div>
           ) : (
             <Fragment>
@@ -38,11 +37,11 @@ const App = ({ getUserData, UI }) => {
 }
 
 App.propTypes = {
-  UI: PropTypes.object.isRequired
+  user: PropTypes.object.isRequired
 }
 
 const mapstateToProps = state => ({
-  UI: state.UI
+  user: state.user
 });
 
 export default connect(mapstateToProps, { getUserData })(App);
