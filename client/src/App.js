@@ -13,6 +13,7 @@ import './App.css';
 const App = ({ getUserData, UI }) => {
   useEffect(() => {
     const auth = sessionStorage.getItem('auth');
+    console.log('auth')
     if(auth) getUserData(JSON.parse(auth));
   }, [getUserData]);
 

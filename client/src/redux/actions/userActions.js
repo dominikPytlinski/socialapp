@@ -1,4 +1,4 @@
-import { SET_USER, LOADING_UI, SET_ERRORS, CLEAR_ERRORS, STOP_LOADING } from '../types';
+import { SET_USER, LOADING_UI, SET_ERRORS, CLEAR_ERRORS, STOP_LOADING, CLEAR_USER } from '../types';
 import axios from 'axios';
 
 export const loginUser = (loginData, history) => (dispatch) => {
@@ -55,6 +55,15 @@ export const clearUserErrors = () => (dispatch) => {
     dispatch({
         type: CLEAR_ERRORS
     });
+}
+
+export const logoutUser = (e) => (dispatch) => {
+    sessionStorage.removeItem('auth');
+    delete axios.defaults.headers.common['Authorization'];
+    dispatch({
+        type: CLEAR_USER
+    });
+    
 }
 
 const setAuthorizationHeader = (token) => {
