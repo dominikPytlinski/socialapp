@@ -156,16 +156,16 @@ a {
   width: 50%;
   padding: 2rem;
   margin: 0 auto;
+  background-color: #fff;
+  text-align: center;
+  border-radius: 5px;
+  -webkit-box-shadow: 10px 10px 5px -5px rgba(0,0,0,0.75);
+  -moz-box-shadow: 10px 10px 5px -5px rgba(0,0,0,0.75);
+  box-shadow: 10px 10px 5px -5px rgba(0,0,0,0.75);
 }
 
 .form-control {
-  display: flex;
-  flex-direction: column;
-  padding: 1rem;
-}
-
-.form-control label {
-  padding: .2rem;
+  margin-top: 15px;
 }
 
 .form-control input {

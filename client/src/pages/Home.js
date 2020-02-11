@@ -7,7 +7,7 @@ import PostsList from '../components/PostsList';
 
 const Home = ({ data, getPosts }) => {    
     useEffect(() => {
-       getPosts(); 
+        getPosts()
     }, [getPosts]);
     
     return (
