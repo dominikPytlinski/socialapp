@@ -27,11 +27,11 @@ const Login = ({UI, loginUser, clearUserErrors, history}) => {
         <main className="container">
             {UI.loading && (<div className="curtain"><Loading /></div>)}
             <div className="login-form">
-                <h3>Logowanie</h3>
+                <h3 className="form-title">Logowanie</h3>
                 <form className="form" onSubmit={handleSubmit}>
                     {UI.errors && (<div className="alert-message">{UI.errors.data.error}</div>)}
-                    <TextField label="Email" fullWidth onChange={e => setEmail(e.target.value)} />
-                    <TextField margin="normal" label="Hasło" fullWidth onChange={e => setPassword(e.target.value)} />
+                    <TextField type="email" label="Email" fullWidth onChange={e => setEmail(e.target.value)} />
+                    <TextField margin="normal" label="Hasło" type="password" fullWidth onChange={e => setPassword(e.target.value)} />
                     <div className="form-control">
                         <Button variant="contained" color="primary" type="submit">
                             Zaloguj
