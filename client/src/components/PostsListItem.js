@@ -22,6 +22,9 @@ const useStyles = makeStyles({
     postDetails: {
         display: 'flex',
         flexDirection: 'column'
+    },
+    dateTime: {
+        color: '#999'
     }
 })
 
@@ -46,6 +49,7 @@ const PostsListItem = ({ post: { likes, comments, _id, title, body, createdAt, u
                 </Typography>
                 <Typography
                     variant="caption"
+                    className={classes.dateTime}
                 >
                     {dayjs(createdAt).fromNow()}
                 </Typography>
