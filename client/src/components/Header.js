@@ -1,9 +1,7 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
-// Redux
-import { connect } from 'react-redux';
-import { logoutUser } from '../redux/actions/userActions';
+//Redux
+import { useSelector } from 'react-redux';
 //MUI
 import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
@@ -15,7 +13,8 @@ import NotificationsIcon from '@material-ui/icons/Notifications';
 //Components
 import AddPost from './AddPost';
  
-const Header = ({ user, logoutUser }) => {
+const Header = (props) => {
+    const user = useSelector(state => state.user);
     return (
         <header className="header">
             <div className="logo">
@@ -44,7 +43,7 @@ const Header = ({ user, logoutUser }) => {
                         <li className="main-menu-item">
                             <Tooltip title="Wyloguj" >
                                 <IconButton
-                                    onClick={(e) => logoutUser()}
+                                    onClick={props.logout}
                                 >
                                     <PowerSettingsNewIcon
                                         style={{ color: '#fff' }}
@@ -83,14 +82,5 @@ const Header = ({ user, logoutUser }) => {
     )
 }
 
-Header.propTypes = {
-    user: PropTypes.object.isRequired,
-    logoutUser: PropTypes.func.isRequired
-}
-
-const mapStateToPropas = state => ({
-    user: state.user
-});
-
-export default connect(mapStateToPropas, { logoutUser })(Header);
+export default Header;
 
