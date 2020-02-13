@@ -26,7 +26,7 @@ const theme = createMuiTheme({
   }
 });
 
-const App = (props) => {
+const App = () => {
   const user = useSelector(state => state.user);
   const dispatch = useDispatch();
 
@@ -61,7 +61,6 @@ const App = (props) => {
     dispatch({
         type: CLEAR_USER
     });
-    props.history.push('/');
   }
 
   return (
