@@ -86,9 +86,7 @@ exports.getAllPosts = async (req, res, next) => {
         if(posts.length == 0) setErrors(404, 'Posts not found');
         posts.map(async post => {
             outputPosts.push({
-                ...post._doc,
-                likes: Object.keys(post._doc.likes).length,
-                comments: Object.keys(post._doc.comments).length
+                ...post._doc
             });
         });
         return res.status(200).json({

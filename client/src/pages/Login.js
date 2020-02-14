@@ -4,12 +4,26 @@ import axios from 'axios';
 import { useSelector, useDispatch } from 'react-redux';
 import { CLEAR_ERRORS, LOADING_UI, STOP_LOADING_UI, SET_USER, SET_ERRORS } from '../redux/types';
 //MUI
+import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
+import CircularProgress from '@material-ui/core/CircularProgress';
 //Components
 import Loading from '../components/Loading';
 
+const useStyles = makeStyles({
+    button: {
+        position: 'relative'
+    },
+    progress: {
+        position: 'absolute',
+        top: '10%',
+        left: '33%',
+    }
+});
+
 const Login = (props) => {
+    const classes = useStyles();
     const UI = useSelector(state => state.UI);
     const dispatch = useDispatch();
     const [email, setEmail] = useState('');
@@ -63,7 +77,6 @@ const Login = (props) => {
 
     return (
         <main className="container">
-            {UI.loading && (<div className="curtain"><Loading /></div>)}
             <div className="login-form">
                 <h3 className="form-title">Logowanie</h3>
                 <form className="form" onSubmit={handleSubmit}>
@@ -71,8 +84,9 @@ const Login = (props) => {
                     <TextField type="email" label="Email" fullWidth onChange={e => setEmail(e.target.value)} />
                     <TextField margin="normal" label="Hasło" type="password" fullWidth onChange={e => setPassword(e.target.value)} />
                     <div className="form-control">
-                        <Button variant="contained" color="primary" type="submit">
+                        <Button variant="contained" color="primary" type="submit" className={classes.button} disabled={UI.loading}>
                             Zaloguj
+                            {UI.loading && <CircularProgress size={30} className={classes.progress} />}
                         </Button>
                     </div>
                 </form>
