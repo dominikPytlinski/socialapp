@@ -3,7 +3,7 @@ import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import axios from 'axios';
 //Redux
 import { useSelector, useDispatch } from 'react-redux';
-import { LOADING_USER, SET_USER, STOP_LOADING_UI, CLEAR_USER } from './redux/types';
+import { LOADING_USER, SET_USER, STOP_LOADING_UI, CLEAR_USER, STOP_LOADING_USER } from './redux/types';
 //MUI
 import { createMuiTheme } from '@material-ui/core/styles';
 import { MuiThemeProvider } from '@material-ui/core/styles';
@@ -50,7 +50,7 @@ const App = () => {
         })
         .catch(err => {
           dispatch({
-            type: STOP_LOADING_UI
+            type: STOP_LOADING_USER
           });
           console.log(err.response);
         })

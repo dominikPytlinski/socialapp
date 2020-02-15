@@ -8,5 +8,6 @@ export const SET_USER = 'SET_USER';
 export const CLEAR_USER = 'CLEAR_USER';
 export const STOP_LOADING_UI = 'STOP_LOADING';
 export const STOP_LOADING_USER = 'STOP_LOADING_USER';
+export const STOP_LOADING_DATA = 'STOP_LOADING_DATA';
 export const LIKE_POST = 'LIKE_POST';
 export const UNLIKE_POST = 'UNLIKE_POST';

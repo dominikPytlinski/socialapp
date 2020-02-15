@@ -1,4 +1,4 @@
-import { SET_POSTS, LOADING_DATA, LIKE_POST, UNLIKE_POST } from '../types';
+import { SET_POSTS, LOADING_DATA, LIKE_POST, UNLIKE_POST, STOP_LOADING_DATA } from '../types';
 
 const initialState = {
     posts: [],
@@ -18,6 +18,11 @@ export default function(state = initialState, action) {
             return {
                 ...state,
                 loading: true
+            }
+        case STOP_LOADING_DATA:
+            return {
+                ...state,
+                loading: false
             }
         case LIKE_POST:
             const index = state.posts.findIndex(post => post._id === action.payload.postId);
