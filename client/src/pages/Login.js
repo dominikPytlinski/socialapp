@@ -5,20 +5,16 @@ import { useSelector, useDispatch } from 'react-redux';
 import { CLEAR_ERRORS, LOADING_UI, STOP_LOADING_UI, SET_USER, SET_ERRORS } from '../redux/types';
 //MUI
 import { makeStyles } from '@material-ui/core/styles';
-import TextField from '@material-ui/core/TextField';
-import Button from '@material-ui/core/Button';
 import CircularProgress from '@material-ui/core/CircularProgress';
 //Components
-import Loading from '../components/Loading';
+import CustomInput from '../components/CustomInput';
+import CustomButton from '../components/CustomButton';
 
 const useStyles = makeStyles({
-    button: {
-        position: 'relative'
-    },
     progress: {
         position: 'absolute',
-        top: '10%',
-        left: '33%',
+        top: '15%',
+        left: '30%',
     }
 });
 
@@ -78,16 +74,19 @@ const Login = (props) => {
     return (
         <main className="container">
             <div className="login-form">
-                <h3 className="form-title">Logowanie</h3>
-                <form className="form" onSubmit={handleSubmit}>
+                <h3>Logowanie</h3>
+                <form onSubmit={handleSubmit}>
                     {UI.errors && (<div className="alert-message">{UI.errors.data.error}</div>)}
-                    <TextField type="email" label="Email" fullWidth onChange={e => setEmail(e.target.value)} />
-                    <TextField margin="normal" label="Hasło" type="password" fullWidth onChange={e => setPassword(e.target.value)} />
+                    <CustomInput value={email} type="text" name="email" label="Email" onChange={e => setEmail(e.target.value)} />
+                    <CustomInput value={password} type="password" name="password" label="Hasło" onChange={e => setPassword(e.target.value)} />
                     <div className="form-control">
-                        <Button variant="contained" color="primary" type="submit" className={classes.button} disabled={UI.loading}>
+                        <CustomButton
+                            color="primary"
+                            disabled={UI.loading}
+                        >
                             Zaloguj
-                            {UI.loading && <CircularProgress size={30} className={classes.progress} />}
-                        </Button>
+                            {UI.loading && <CircularProgress className={classes.progress} size={25} />}
+                        </CustomButton>
                     </div>
                 </form>
             </div>
