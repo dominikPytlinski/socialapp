@@ -44,7 +44,9 @@ const App = () => {
           dispatch({
             type: SET_USER,
             payload: data
-          })
+          });
+          const authToken = `Bearer ${auth.token}`;
+          axios.defaults.headers.common['Authorization'] = authToken;
         })
         .catch(err => {
           dispatch({

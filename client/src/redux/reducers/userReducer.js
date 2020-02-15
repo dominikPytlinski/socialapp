@@ -3,6 +3,7 @@ import { SET_USER, CLEAR_USER, LOADING_USER,  } from '../types';
 const initialState = {
     loading: false,
     logged: false,
+    id: null,
     role: null,
     token: null,
     image: null,
@@ -23,6 +24,7 @@ export default function(state = initialState, action) {
                 ...state,
                 loading: false,
                 logged: true,
+                id: action.payload.user._id,
                 role: action.payload.user.role.role,
                 token: action.payload.token,
                 image: action.payload.user.image,
@@ -35,6 +37,7 @@ export default function(state = initialState, action) {
                 ...state,
                 loading: false,
                 logged: false,
+                id: null,
                 role: null,
                 token: null,
                 image: null,
