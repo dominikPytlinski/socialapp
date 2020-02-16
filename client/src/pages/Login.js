@@ -76,7 +76,7 @@ const Login = (props) => {
             <div className="login-form">
                 <h3>Logowanie</h3>
                 <form onSubmit={handleSubmit}>
-                    {UI.errors ? UI.errors.data ? (<div className="alert-message">{UI.errors.data.error}</div>) : null : null}
+                    {UI.errors && (<div className="alert-message">{UI.errors.data.error}</div>)}
                     <CustomInput value={email} type="text" name="email" label="Email" onChange={e => setEmail(e.target.value)} />
                     <CustomInput value={password} type="password" name="password" label="Hasło" onChange={e => setPassword(e.target.value)} />
                     <div className="form-control">

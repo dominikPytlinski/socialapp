@@ -30,12 +30,9 @@ const App = () => {
   const user = useSelector(state => state.user);
   const dispatch = useDispatch();
 
-  useEffect(() => {
+  if(!user.logged) {
     const auth = JSON.parse(sessionStorage.getItem('auth'));
     if(auth) {
-      dispatch({
-        type: LOADING_USER
-      });
       axios.get(`http://localhost:4000/users/${auth.id}`)
         .then(res => {
           const data = {
@@ -51,11 +48,11 @@ const App = () => {
         .catch(err => {
           dispatch({
             type: STOP_LOADING_USER
-          });
+          })
           console.log(err.response);
         })
     }
-  }, [dispatch]);
+  }
 
   const logoutUser = () => {
     sessionStorage.removeItem('auth');

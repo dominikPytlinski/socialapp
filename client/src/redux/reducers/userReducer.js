@@ -1,7 +1,7 @@
 import { SET_USER, CLEAR_USER, LOADING_USER,  } from '../types';
 
 const initialState = {
-    loading: false,
+    loading: true,
     logged: false,
     id: null,
     role: null,
