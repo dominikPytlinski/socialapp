@@ -91,7 +91,8 @@ exports.getSingleUser = async (req, res, next) => {
                     nickName: user._doc.nickName,
                     role: user._doc.role,
                     createdAt: user._doc.createdAt,
-                    updatedAt: user._doc.updatedAt
+                    updatedAt: user._doc.updatedAt,
+                    image: user._doc.image
                 }
             });
         } else {

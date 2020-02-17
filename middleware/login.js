@@ -29,7 +29,8 @@ exports.loginUser = async (req, res, next) => {
                     nickName: user._doc.nickName,
                     createdAt: user._doc.createdAt,
                     updatedAt: user._doc.updatedAt,
-                    role: user._doc.role
+                    role: user._doc.role,
+                    image: user._doc.image
                 }
             }
         })

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 //Redux
 import { useSelector, useDispatch } from 'react-redux';
-import { CLEAR_ERRORS, LOADING_UI, STOP_LOADING_UI, SET_USER, SET_ERRORS } from '../redux/types';
+import { CLEAR_USER_ERRORS, LOADING_UI, STOP_LOADING_UI, SET_USER, SET_USER_ERRORS, LOADING_USER } from '../redux/types';
 //MUI
 import { makeStyles } from '@material-ui/core/styles';
 import CircularProgress from '@material-ui/core/CircularProgress';
@@ -21,20 +21,21 @@ const useStyles = makeStyles({
 const Login = (props) => {
     const classes = useStyles();
     const UI = useSelector(state => state.UI);
+    const user = useSelector(state => state.user);
     const dispatch = useDispatch();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
     useEffect(() =>{
         dispatch({
-            type: CLEAR_ERRORS
+            type: CLEAR_USER_ERRORS
         });
     }, [dispatch])
 
     const handleSubmit = (e) => {
         e.preventDefault();
         dispatch({
-            type: LOADING_UI
+            type: LOADING_USER
         });
         const loginData = {
             email: email,
@@ -42,9 +43,6 @@ const Login = (props) => {
         };
         axios.post('http://localhost:4000/login', loginData)
             .then(res => {
-                dispatch({
-                    type: STOP_LOADING_UI
-                });
                 dispatch({
                     type: SET_USER,
                     payload: res.data.data
@@ -61,10 +59,7 @@ const Login = (props) => {
             })
             .catch(err => {
                 dispatch({
-                    type: STOP_LOADING_UI
-                })
-                dispatch({
-                    type: SET_ERRORS,
+                    type: SET_USER_ERRORS,
                     payload: err.response
                 });
             })
@@ -76,16 +71,16 @@ const Login = (props) => {
             <div className="login-form">
                 <h3>Logowanie</h3>
                 <form onSubmit={handleSubmit}>
-                    {UI.errors && (<div className="alert-message">{UI.errors.data.error}</div>)}
+                    {user.errors && (<div className="alert-message">{UI.errors.data.error}</div>)}
                     <CustomInput value={email} type="text" name="email" label="Email" onChange={e => setEmail(e.target.value)} />
                     <CustomInput value={password} type="password" name="password" label="Hasło" onChange={e => setPassword(e.target.value)} />
                     <div className="form-control">
                         <CustomButton
                             color="primary"
-                            disabled={UI.loading}
+                            disabled={user.loading}
                         >
                             Zaloguj
-                            {UI.loading && <CircularProgress className={classes.progress} size={25} />}
+                            {user.loading && <CircularProgress className={classes.progress} size={25} />}
                         </CustomButton>
                     </div>
                 </form>

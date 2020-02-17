@@ -18,6 +18,8 @@ import IconButton from '@material-ui/core/IconButton';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
 import FavoriteIcon from '@material-ui/icons/Favorite';
+//Components
+import Post from './Post';
 
 const useStyles = makeStyles({
     postListItem: {
@@ -43,11 +45,6 @@ const useStyles = makeStyles({
     content: {
         margin: '1rem 0'
     },
-    extendButton: {
-        position: 'absolute',
-        top: '10px',
-        right: '5%'
-    },
     likeButton: {
         position: 'absolute',
         top: '10px',
@@ -55,7 +52,7 @@ const useStyles = makeStyles({
     }
 })
 
-const PostsListItem = ({ post: { likes, comments, _id, title, body, createdAt, updatedAt, creator }}) => {
+const PostsListItem = ({ post }) => {
     dayjs.extend(relativTime);
     const user = useSelector(state => state.user);
     const classes = useStyles();
@@ -63,12 +60,12 @@ const PostsListItem = ({ post: { likes, comments, _id, title, body, createdAt, u
 
     const handleLike = () => {
         const likeData = {
-            post: _id
+            post: post._id
         }
         axios.post('http://localhost:4000/posts/like', likeData)
             .then(() => {
                 const data = {
-                    postId: _id,
+                    postId: post._id,
                     userId: user.id
                 }
                 dispatch({
@@ -81,12 +78,12 @@ const PostsListItem = ({ post: { likes, comments, _id, title, body, createdAt, u
 
     const handleUnlike = () => {
         const unlikeData = {
-            post: _id
+            post: post._id
         }
         axios.post('http://localhost:4000/posts/unlike', unlikeData)
             .then(() => {
                 const data = {
-                    postId: _id,
+                    postId: post._id,
                     userId: user.id
                 }
                 dispatch({
@@ -101,55 +98,60 @@ const PostsListItem = ({ post: { likes, comments, _id, title, body, createdAt, u
         <Card className={classes.postListItem}>
             <CardMedia
                 className={classes.media}
-                image={creator.image}
+                image={post.creator.image}
                 alt="user"
             />
             <CardContent className={classes.postDetails}>
-                <Typography
-                    variant="h5"
-                    component={Link}
-                    to="#"
-                    color="primary"
+                <Tooltip
+                    title={post.creator.nickName}
+                    placement="top"
                 >
-                    {creator.nickName}
-                </Typography>
+                    <Typography
+                        variant="h5"
+                        component={Link}
+                        to="#"
+                        color="primary"
+                    >
+                        {post.creator.nickName}
+                    </Typography>
+                </Tooltip>
                 <Typography
                     variant="subtitle1"
                 >
-                    {title}
+                    {post.title}
                 </Typography>
                 <Typography
                     variant="caption"
                     className={classes.dateTime}
                 >
-                    {dayjs(createdAt).fromNow()}
+                    {dayjs(post.createdAt).fromNow()}
                 </Typography>
                 <Typography
                     variant="body2"
                     className={classes.content}
                 >
-                    {body}
+                    {post.body}
                 </Typography>
                 <div style={{ display: 'flex' }}>
                     <Typography
                         variant="caption"
                     >
-                        Polubienia: {Object.keys(likes).length}
+                        Polubienia: {Object.keys(post.likes).length}
                     </Typography>
                     <Typography
                         variant="caption"
                         style={{ marginLeft: '.5rem' }}
                     >
-                        Komentarze: {Object.keys(comments).length}
+                        Komentarze: {Object.keys(post.comments).length}
                     </Typography>
                 </div>
             </CardContent>
             {user.logged && (
                 <Fragment>
-                    {user.id !== creator._id && (
-                        likes.filter(like => like === user.id).length === 0 ? (
+                    {user.id !== post.creator._id && (
+                        post.likes.filter(like => like === user.id).length === 0 ? (
                             <Tooltip
-                                title="Libię to"
+                                title="Lubię to"
                                 placement="top"
                             >
                                 <IconButton
@@ -177,21 +179,9 @@ const PostsListItem = ({ post: { likes, comments, _id, title, body, createdAt, u
                             </Tooltip>
                         )
                     )}
-                    <Tooltip
-                        title="Pokaż więcej"
-                        placement="top"
-                    >
-                        <IconButton
-                            className={classes.extendButton}
-                        >
-                            <MoreVertIcon
-                                color="primary"
-                            />
-                        </IconButton>
-                    </Tooltip>
+                    <Post post={post} />
                 </Fragment>
             ) }
-            
         </Card>
     )
 }

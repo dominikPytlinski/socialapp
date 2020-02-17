@@ -1,9 +1,9 @@
-import React, { Fragment, useEffect } from 'react';
+import React, { Fragment } from 'react';
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import axios from 'axios';
 //Redux
 import { useSelector, useDispatch } from 'react-redux';
-import { LOADING_USER, SET_USER, STOP_LOADING_UI, CLEAR_USER, STOP_LOADING_USER } from './redux/types';
+import { SET_USER, CLEAR_USER, STOP_LOADING_USER } from './redux/types';
 //MUI
 import { createMuiTheme } from '@material-ui/core/styles';
 import { MuiThemeProvider } from '@material-ui/core/styles';
@@ -51,6 +51,10 @@ const App = () => {
           })
           console.log(err.response);
         })
+    } else if(user.loadingLogged) {
+      dispatch({
+        type: STOP_LOADING_USER
+      })
     }
   }
 
@@ -66,7 +70,7 @@ const App = () => {
     <Fragment>
         <MuiThemeProvider theme={theme}>
           <BrowserRouter>
-            {user.loading ? (
+            {user.loadingLogged ? (
               <div className="curtain"><Loading /></div>
             ) : (
               <Fragment>
@@ -75,6 +79,7 @@ const App = () => {
                   <Route exact path="/" component={Home} />
                   <Route path="/login" component={Login} />
                   <Route path="/signup" component={Signup} />
+                  <Route exact path="/users/:nickName/posts/:postId" component={Home} />
                 </Switch>
               </Fragment>
             )}

@@ -1,7 +1,8 @@
-import { SET_USER, CLEAR_USER, LOADING_USER,  } from '../types';
+import { SET_USER, CLEAR_USER, LOADING_USER, STOP_LOADING_USER, SET_USER_ERRORS, CLEAR_USER_ERRORS,  } from '../types';
 
 const initialState = {
-    loading: true,
+    loading: false,
+    loadingLogged: true,
     logged: false,
     id: null,
     role: null,
@@ -9,7 +10,8 @@ const initialState = {
     image: null,
     email: null,
     nickName: null,
-    createdAt: null
+    createdAt: null,
+    errors: null
 }
 
 export default function(state = initialState, action) {
@@ -19,10 +21,16 @@ export default function(state = initialState, action) {
                 ...state,
                 loading: true
             }
+        case STOP_LOADING_USER:
+            return {
+                ...state,
+                loadingLogged: false
+            }
         case SET_USER:
             return {
                 ...state,
                 loading: false,
+                loadingLogged: false,
                 logged: true,
                 id: action.payload.user._id,
                 role: action.payload.user.role.role,
@@ -30,7 +38,8 @@ export default function(state = initialState, action) {
                 image: action.payload.user.image,
                 email: action.payload.user.email,
                 nickName: action.payload.user.nickName,
-                createdAt: action.payload.user.createdAt
+                createdAt: action.payload.user.createdAt,
+                errors: null
             }
         case CLEAR_USER:
             return {
@@ -43,7 +52,20 @@ export default function(state = initialState, action) {
                 image: null,
                 email: null,
                 nickName: null,
-                createdAt: null
+                createdAt: null,
+                errors: null
+            }
+        case SET_USER_ERRORS:
+            return {
+                ...state,
+                errors: action.payload,
+                loading: false
+            }
+        case CLEAR_USER_ERRORS:
+            return {
+                ...state,
+                errors: null,
+                loading: false
             }
         default:
             return state;

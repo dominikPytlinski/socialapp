@@ -1,9 +1,10 @@
-import { SET_POSTS, LOADING_DATA, LIKE_POST, UNLIKE_POST, STOP_LOADING_DATA } from '../types';
+import { SET_POSTS, LOADING_DATA, LIKE_POST, UNLIKE_POST, STOP_LOADING_DATA, SET_DATA_ERRORS, CLEAR_DATA_ERRORS } from '../types';
 
 const initialState = {
     posts: [],
     post: {},
-    loading: false
+    loading: false,
+    errors: null
 }
 
 export default function(state = initialState, action) {
@@ -12,6 +13,7 @@ export default function(state = initialState, action) {
             return {
                 ...state,
                 loading: false,
+                errors: null,
                 posts: action.payload
             }
         case LOADING_DATA:
@@ -36,6 +38,16 @@ export default function(state = initialState, action) {
             state.posts[postIndex].likes.splice(likeIndex, 1);
             return {
                 ...state
+            }
+        case SET_DATA_ERRORS:
+            return {
+                ...state,
+                errors: action.payload
+            }
+        case CLEAR_DATA_ERRORS:
+            return {
+                ...state,
+                errors: null
             }
         default:
             return state;
