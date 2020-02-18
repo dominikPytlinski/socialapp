@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 //Redux
 import { useSelector, useDispatch } from 'react-redux';
-import { CLEAR_USER_ERRORS, LOADING_UI, STOP_LOADING_UI, SET_USER, SET_USER_ERRORS, LOADING_USER } from '../redux/types';
+import { CLEAR_USER_ERRORS, SET_USER, SET_USER_ERRORS, LOADING_USER } from '../redux/types';
 //MUI
 import { makeStyles } from '@material-ui/core/styles';
 import CircularProgress from '@material-ui/core/CircularProgress';

@@ -13,13 +13,9 @@ import CardMedia from '@material-ui/core/CardMedia';
 import CardContent from '@material-ui/core/CardContent';
 import Typography from '@material-ui/core/Typography';
 import Tooltip from '@material-ui/core/Tooltip';
-import IconButton from '@material-ui/core/IconButton';
-//Icons
-import MoreVertIcon from '@material-ui/icons/MoreVert';
-import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
-import FavoriteIcon from '@material-ui/icons/Favorite';
 //Components
 import Post from './Post';
+import LikeButton from './LikeButton';
 
 const useStyles = makeStyles({
     postListItem: {
@@ -44,11 +40,6 @@ const useStyles = makeStyles({
     },
     content: {
         margin: '1rem 0'
-    },
-    likeButton: {
-        position: 'absolute',
-        top: '10px',
-        right: '11%'
     }
 })
 
@@ -148,37 +139,7 @@ const PostsListItem = ({ post }) => {
             </CardContent>
             {user.logged && (
                 <Fragment>
-                    {user.id !== post.creator._id && (
-                        post.likes.filter(like => like === user.id).length === 0 ? (
-                            <Tooltip
-                                title="Lubię to"
-                                placement="top"
-                            >
-                                <IconButton
-                                    className={classes.likeButton}
-                                    onClick={handleLike}
-                                >
-                                    <FavoriteBorderIcon
-                                        color='primary'
-                                    />
-                                </IconButton>
-                            </Tooltip>
-                        ) : (
-                            <Tooltip
-                                title="Nie lubię"
-                                placement="top"
-                            >
-                                <IconButton
-                                    className={classes.likeButton}
-                                    onClick={handleUnlike}
-                                >
-                                    <FavoriteIcon
-                                        color='primary'
-                                    />
-                                </IconButton>
-                            </Tooltip>
-                        )
-                    )}
+                    <LikeButton post={post} pos={true} />
                     <Post post={post} />
                 </Fragment>
             ) }
